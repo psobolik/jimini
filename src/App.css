@@ -1,0 +1,271 @@
+:root {
+  --footer-border-color: #00000050;
+
+  --color: #0f0f0f;
+  --background-color: #f6f6f6;
+
+  --input-color: #0f0f0f;
+  --input-background-color: #ffffff;
+  --input-box-shadow-color: #00000050;
+  --button-hover-border-color: #4561ff;
+  --button-hover-background-color: #0000ff20;
+  --button-border-color: #0000007f;
+
+  --button-disabled-color: #999;
+  --button-disabled-border-color: transparent;
+  --button-disabled-active-background-color: #ffffff22;
+
+  --button-active-border-color: #396cd8;
+  --button-active-background-color: #0f0f0f69;
+
+  --error-color: #ffffff;
+  --error-background-color: #ff0000;
+  --error-border-color: #440000;
+
+  --info-color: #0f0f00;
+  --info-background-color: #ffff00;
+  --info-border-color: #2f2f00;
+
+  --quote-border-color: #888;
+  --quote-background-color: #e0e0e0;
+
+  --pre-background-color: #f0f0f0;
+
+  --link-color: #0f0ff0;
+
+  --svg-buton-stroke: #808080;
+  --svg-button-disabled-stroke: #ccc;
+
+  --dialog-color: #0f0f0f;
+  --dialog-background-color: #f6f6f6;
+
+  --loading-color: #f0f000;
+
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.2em;
+  font-weight: 400;
+
+  color: var(--color);
+  background-color: var(--background-color);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  margin: 0;
+  padding: 1.5em 0.5em;
+}
+header {
+  background-color: var(--background-color);
+  position: fixed;
+  width: 100%;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: row;
+  column-gap: 0.15em;
+  height: 1.5em;
+}
+footer {
+  font-size: 0.95em;
+  background-color: var(--background-color);
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  padding: 0 0.25em;
+  height: 1.2em;
+  overflow: hidden;
+  border-top: solid 1px var(--footer-border-color);
+}
+h1, h2, h3 {
+  line-height: 1.2em;
+  margin-block-start: 0.25em;
+  margin-block-end: 0.25em;
+}
+
+input,
+button {
+  border-radius: 4px;
+  outline: none;
+  border: 1px solid var(--button-border-color);
+  color: var(--input-color);
+  background-color: var(--input-background-color);
+  padding: 0.25em 0.5em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  transition: border-color 0.25s;
+  box-shadow: 0 2px 2px var(--input-box-shadow-color);
+}
+button {
+  cursor: pointer;
+}
+button:hover {
+  background-color: var(--button-hover-background-color);
+  border-color: var(--button-hover-border-color);
+}
+button:active {
+  border-color: var(--button-active-border-color);
+  background-color: var(--button-active-background-color);
+}
+button:disabled {
+  cursor: not-allowed;
+  color: var(--button-disabled-color);
+  border-color: var(--button-disabled-border-color);
+  background-color: var(--button-disabled-active-background-color);
+}
+img {
+  scale: .9;
+}
+.container {
+  margin: 0;
+  padding: 0.5em 0;
+  display: flex;
+  flex-direction: column;
+}
+#success div.text {
+  white-space: pre-wrap;
+}
+#success div.text:before {
+  content: '\200b';
+}
+#gemini-url-input {
+  flex: auto;
+}
+#info, #gemini_error {
+  font-size: larger;
+  text-align: center;
+  padding: 1em;
+  margin: 0.5em;
+  border: thin solid transparent;
+}
+#info {
+  background-color: var(--info-background-color);
+  color: var(--info-color);
+  border-color: var(--info-border-color);
+}
+#gemini_error {
+  background-color: var(--error-background-color);
+  color: var(--error-color);
+  border-color: var(--error-border-color);
+}
+.plain {
+  font-family: monospace;
+}
+.quote {
+  padding: 0.5em;
+  margin: 0.75em 0;
+  border-left: solid 0.125em var(--quote-border-color);
+  background-color: var(--quote-background-color);
+}
+pre {
+  font-family: monospace;
+  font-size: smaller;
+  padding: 0.5em;
+  margin: 0.75em 0;
+  background-color: var(--pre-background-color);
+  overflow: scroll;
+}
+pre div {
+  line-height: 1.15;
+}
+.list-item {
+  margin-left: 1em;
+  padding-bottom: 0.5em;
+}
+.list-item:before {
+  margin-left: -1em;
+  font-family: monospace;
+  content: "\2022";
+}
+.link {
+  cursor: pointer;
+  text-decoration-line: underline;
+  color: var(--link-color);
+}
+.nav-button {
+  padding: 0.5em;
+}
+.nav-button svg {
+  stroke-width: 0.75;
+  stroke: var(--input-color);
+  width: 16px;
+  height: 16px;
+}
+.nav-button:disabled svg {
+  stroke: var(--button-disabled-color);
+}
+#next-button.nav-button svg {
+  transform: translate(0.125em,-0.3em) rotate(90deg);
+}
+#previous-button.nav-button svg {
+  transform: translate(-0.125em,-0.3em) rotate(-90deg);
+}
+dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+dialog {
+  position: relative;
+  color: var(--dialog-color);
+  background-color: var(--dialog-background-color);
+  max-width: 20rem;
+  padding: 1rem;
+  border: solid 4px black;
+  border-radius: 0.5rem;
+  box-shadow: 0.25em 0.25em 0.5rem 0.25rem var(--input-box-shadow-color);
+}
+dialog .button-container {
+  column-gap: 0.15em;
+  display: flex;
+  flex-direction: row;
+}
+dialog .button-container button {
+  flex: 1;
+  margin-top: 1.5em;
+}
+div .loading {
+  text-align: center;
+  padding: 0.5em;
+  color: var(--loading-color);
+  font-size: larger;
+  font-weight: bold;
+  display: block;
+}
+div .not-loading {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Redefine some colors in dark mode */
+    --color: #f6f6f6;
+    --background-color: #2f2f2f;
+    --footer-border-color: #ffffff50;
+    --input-color: #ffffff;
+    --input-background-color: #ffffff22;
+    --error-color: #ff0000;
+    --error-background-color: #0e0e0e;
+    --error-border-color: #ff0000;
+    --info-color: #ffff00;
+    --info-background-color: #0e0e0e;
+    --info-border-color: #ffff00;
+    --quote-border-color: #ffffff88;
+    --quote-background-color: #0f0f0f77;
+    --pre-background-color: #ffffff22;
+    --link-color: #b9b8ea;
+    --svg-buton-stroke: #fff;
+    --svg-button-disabled-stroke: #999;
+    --dialog-color: #f6f6f6;
+    --dialog-background-color: #0f0f0f;
+  }
+}
+
