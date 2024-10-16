@@ -6,13 +6,13 @@ import Success, {SuccessResult} from "./Data/Success.ts"
 import Prompt from "./Data/Prompt.ts";
 import Util from "./Util.ts";
 import GeminiLine, {LineType} from "./Data/GeminiLine.ts";
-import GeminiLink from "./Data/GeminiLink.ts";
+import JiminiLink from "./Ui/JiminiLink.ts";
 import Tauri from "./Tauri.ts";
 import UrlHistory from "./UrlHistory.ts";
 import InputDialog from "./dialogs/InputDialog.tsx";
 import {getMatches} from "@tauri-apps/api/cli";
 import {downloadDir} from "@tauri-apps/api/path";
-import {GeminiResponse} from "./Data/GeminiResponse.ts";
+import GeminiResponse from "./Data/GeminiResponse.ts";
 import {save} from "@tauri-apps/api/dialog";
 import { writeBinaryFile } from "@tauri-apps/api/fs";
 import Certificate from "./Data/Certificate.ts";
@@ -239,12 +239,15 @@ function App() {
                 preformattedChildren.push(<div key={index}>{line}</div>);
             } else switch (geminiLine.type) {
                 case LineType.Link:
-                    const link = GeminiLink.parseString(geminiLine.text ?? "");
+                    const jimini_link = JiminiLink.parseString(geminiLine.text ?? "");
+                    const link = new URL(jimini_link.link, urlInputString);
+                    let className = "link";
+                    if (link.protocol !== "gemini:") className += " foreign-link";
                     lines.push(<div key={index}>
-                        <span className="link" data-link={link.link}
+                        <span className={className} data-link={jimini_link.link}
                               onMouseEnter={e => onLinkHover(e.target as HTMLElement, true)}
                               onMouseLeave={e => onLinkHover(e.target as HTMLElement, false)}
-                              onClick={e => onLinkClick(e.target as HTMLElement)}>{link.name}
+                              onClick={e => onLinkClick(e.target as HTMLElement)}>{jimini_link.name}
                         </span>
                     </div>);
                     break;

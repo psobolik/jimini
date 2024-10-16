@@ -32,6 +32,7 @@
   --pre-background-color: #f0f0f0;
 
   --link-color: #0f0ff0;
+  --foreign-link-color: #874a01;
 
   --svg-buton-stroke: #808080;
   --svg-button-disabled-stroke: #ccc;
@@ -193,6 +194,15 @@ pre div {
   text-decoration-line: underline;
   color: var(--link-color);
 }
+.foreign-link {
+  color: var(--foreign-link-color);
+}
+.foreign-link:after {
+  content: " ]"
+}
+.foreign-link:before {
+  content: "[ ";
+}
 .nav-button {
   padding: 0.5em;
 }
@@ -262,6 +272,7 @@ div .not-loading {
     --quote-background-color: #0f0f0f77;
     --pre-background-color: #ffffff22;
     --link-color: #b9b8ea;
+    --foreign-link-color: #c68f8e;
     --svg-buton-stroke: #fff;
     --svg-button-disabled-stroke: #999;
     --dialog-color: #f6f6f6;

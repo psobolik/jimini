@@ -1,4 +1,4 @@
-export default class GeminiLink {
+export default class JiminiLink {
     link: string;
     name: string;
 
@@ -6,7 +6,7 @@ export default class GeminiLink {
         this.link = link;
         this.name = name;
     }
-    static parseString(s: string): GeminiLink {
+    static parseString(s: string): JiminiLink {
         // =>[<whitespace>]<URL>[<whitespace><USER-FRIENDLY LINK NAME>]
         // "=>" *WSP URI-reference [1*WSP 1*(SP / VCHAR)] *WSP CRLF
         let link: string = "";
@@ -18,6 +18,9 @@ export default class GeminiLink {
             link = array.groups.link ?? "";
             name = array.groups.name ?? "";
         }
-        return new GeminiLink(link.trim(), name ? name.trim() : link.trim());
+        return new JiminiLink(link.trim(), name ? name.trim() : link.trim());
+    }
+    isGeminiLink(): boolean  {
+        return this.link.startsWith("gemini:");
     }
 }

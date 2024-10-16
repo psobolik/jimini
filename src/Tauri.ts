@@ -1,5 +1,5 @@
 import {invoke} from "@tauri-apps/api/tauri";
-import {GeminiResponse} from "./Data/GeminiResponse.ts";
+import GeminiResponse from "./Data/GeminiResponse.ts";
 
 export default class Tauri {
     static makeGeminiRequest = (url: URL): Promise<GeminiResponse> => {
