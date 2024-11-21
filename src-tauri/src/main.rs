@@ -5,6 +5,11 @@ use base64::Engine;
 use gemini_lib::response::GeminiResponse;
 
 #[tauri::command]
+fn version() -> String {
+    env!("CARGO_PKG_VERSION", "Who knows?").to_string()
+}
+
+#[tauri::command]
 async fn open_detached(path: String) -> Result<(), String> {
     match open::that_detached(path) {
         Ok(_) => Ok(()),
@@ -28,9 +33,10 @@ fn make_gemini_request(url: url::Url) -> Result<GeminiResponse, String> {
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
+            version,
             make_gemini_request,
             base64_encode,
-            open_detached
+            open_detached,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

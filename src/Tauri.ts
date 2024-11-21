@@ -11,4 +11,7 @@ export default class Tauri {
     static open_detached = (path: string): Promise<void> => {
         return invoke("open_detached", {path: path});
     }
+    static version = (): Promise<string> => {
+        return invoke("version");
+    }
 }

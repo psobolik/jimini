@@ -1,4 +1,28 @@
 :root {
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.2em;
+  font-weight: 400;
+
+  --header-height: 1.8rem; /* Also used to position menu */
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+#wrapper {
+  color: var(--color);
+  background-color: var(--background-color);
+}
+#wrapper.smaller-text {
+  font-size: smaller;
+}
+#wrapper.larger-text {
+  font-size: larger;
+}
+#wrapper.light-scheme {
   --footer-border-color: #00000050;
 
   --color: #0f0f0f;
@@ -31,8 +55,8 @@
 
   --pre-background-color: #f0f0f0;
 
-  --link-color: #0f0ff0;
-  --foreign-link-color: #874a01;
+  --link-color: #0000ff;
+  --foreign-link-color: #5072f8;
 
   --svg-buton-stroke: #808080;
   --svg-button-disabled-stroke: #ccc;
@@ -41,40 +65,71 @@
   --dialog-background-color: #f6f6f6;
 
   --loading-color: #f0f000;
-
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 1.2em;
-  font-weight: 400;
-
-  color: var(--color);
-  background-color: var(--background-color);
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
 }
+#wrapper.dark-scheme {
+  --footer-border-color: #ffffff50;
 
+  --color: #f6f6f6;
+  --background-color: #2f2f2f;
+
+  --input-color: #ffffff;
+  --input-background-color: #ffffff22;
+  --input-box-shadow-color: #00000050;
+  --button-hover-border-color: #4561ff;
+  --button-hover-background-color: #0000ff20;
+  --button-border-color: #0000007f;
+
+  --button-disabled-color: #999;
+  --button-disabled-border-color: transparent;
+  --button-disabled-active-background-color: #ffffff22;
+
+  --button-active-border-color: #396cd8;
+  --button-active-background-color: #0f0f0f69;
+
+  --error-color: #ff0000;
+  --error-background-color: #0e0e0e;
+  --error-border-color: #ff0000;
+
+  --info-color: #ffff00;
+  --info-background-color: #0e0e0e;
+  --info-border-color: #ffff00;
+
+  --quote-border-color: #ffffff88;
+  --quote-background-color: #0f0f0f77;
+
+  --pre-background-color: #ffffff22;
+
+  --link-color: #b9b8ea;
+  --foreign-link-color: #d3dfff;
+
+  --svg-buton-stroke: #fff;
+  --svg-button-disabled-stroke: #999;
+
+  --dialog-color: #f6f6f6;
+  --dialog-background-color: #0f0f0f;
+
+  --loading-color: #f0f000;
+}
 html {
   position: relative;
   min-height: 100%;
 }
 body {
   margin: 0;
-  padding: 1.5em 0.5em;
+  background-color: #ccc;
 }
 header {
   background-color: var(--background-color);
   position: fixed;
-  width: 100%;
   left: 0;
+  right: 0;
   top: 0;
   display: flex;
   flex-direction: row;
   column-gap: 0.15em;
-  height: 1.5em;
+  height: var(--header-height);
+  padding: 0.125rem;
+  z-index: 10;
 }
 footer {
   font-size: 0.95em;
@@ -130,14 +185,14 @@ img {
 }
 .container {
   margin: 0;
-  padding: 0.5em 0;
+  padding: var(--header-height) 0.5rem;
   display: flex;
   flex-direction: column;
 }
-#success div.text {
+.container div.text {
   white-space: pre-wrap;
 }
-#success div.text:before {
+.container div.text:before {
   content: '\200b';
 }
 #gemini-url-input {
@@ -178,7 +233,7 @@ pre {
   overflow: scroll;
 }
 pre div {
-  line-height: 1.15;
+  line-height: 1.5;
 }
 .list-item {
   margin-left: 1em;
@@ -216,10 +271,14 @@ pre div {
   stroke: var(--button-disabled-color);
 }
 #next-button.nav-button svg {
-  transform: translate(0.125em,-0.3em) rotate(90deg);
+  transform: translate(0.125em,-0.18em) rotate(90deg);
 }
 #previous-button.nav-button svg {
-  transform: translate(-0.125em,-0.3em) rotate(-90deg);
+  transform: translate(-0.125em,-0.18em) rotate(-90deg);
+}
+#menu-button.nav-button svg {
+  stroke-width: 2;
+  transform: translate(-0.125em,-0.18em);
 }
 dialog::backdrop {
   background-color: rgba(0, 0, 0, 0.5);
@@ -228,7 +287,7 @@ dialog {
   position: relative;
   color: var(--dialog-color);
   background-color: var(--dialog-background-color);
-  max-width: 20rem;
+  max-width: 30rem;
   padding: 1rem;
   border: solid 4px black;
   border-radius: 0.5rem;
@@ -251,32 +310,3 @@ div .loading {
   font-weight: bold;
   display: block;
 }
-div .not-loading {
-  display: none;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Redefine some colors in dark mode */
-    --color: #f6f6f6;
-    --background-color: #2f2f2f;
-    --footer-border-color: #ffffff50;
-    --input-color: #ffffff;
-    --input-background-color: #ffffff22;
-    --error-color: #ff0000;
-    --error-background-color: #0e0e0e;
-    --error-border-color: #ff0000;
-    --info-color: #ffff00;
-    --info-background-color: #0e0e0e;
-    --info-border-color: #ffff00;
-    --quote-border-color: #ffffff88;
-    --quote-background-color: #0f0f0f77;
-    --pre-background-color: #ffffff22;
-    --link-color: #b9b8ea;
-    --foreign-link-color: #c68f8e;
-    --svg-buton-stroke: #fff;
-    --svg-button-disabled-stroke: #999;
-    --dialog-color: #f6f6f6;
-    --dialog-background-color: #0f0f0f;
-  }
-}
-

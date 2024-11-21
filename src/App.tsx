@@ -1,21 +1,26 @@
-import "./App.css";
+import "./styles/App.css";
 import React from "react";
-import Redirect from "./Data/Redirect.ts";
-import Failure from "./Data/Failure.ts";
-import Success, {SuccessResult} from "./Data/Success.ts"
-import Prompt from "./Data/Prompt.ts";
-import Util from "./Util.ts";
-import GeminiLine, {LineType} from "./Data/GeminiLine.ts";
-import JiminiLink from "./Ui/JiminiLink.ts";
 import Tauri from "./Tauri.ts";
-import UrlHistory from "./UrlHistory.ts";
-import InputDialog from "./dialogs/InputDialog.tsx";
 import {getMatches} from "@tauri-apps/api/cli";
 import {downloadDir} from "@tauri-apps/api/path";
-import GeminiResponse from "./Data/GeminiResponse.ts";
 import {save} from "@tauri-apps/api/dialog";
-import { writeBinaryFile } from "@tauri-apps/api/fs";
+import {writeBinaryFile} from "@tauri-apps/api/fs";
+import {path} from "@tauri-apps/api";
 import Certificate from "./Data/Certificate.ts";
+import Redirect from "./Data/Redirect.ts";
+import Failure from "./Data/Failure.ts";
+import Success from "./Data/Success.ts"
+import GeminiLine, {LineType} from "./Data/GeminiLine.ts";
+import GeminiResponse from "./Data/GeminiResponse.ts";
+import Prompt from "./Data/Prompt.ts";
+import {ColorScheme, Settings, SettingsIO, TextSize} from "./Data/Settings.ts";
+import Util from "./Util.ts";
+import JiminiLink from "./Ui/JiminiLink.ts";
+import UrlHistory from "./UrlHistory.ts";
+import InputDialog from "./dialogs/InputDialog.tsx";
+import AboutDialog from "./dialogs/AboutDialog.tsx";
+import SettingsDialog from "./dialogs/SettingsDialog.tsx";
+import HamburgerMenu from "./components/HamburgerMenu.tsx";
 
 function App() {
     const URL_HISTORY_CAPACITY = 20;
@@ -33,52 +38,59 @@ function App() {
     const [dialogContent, setDialogContent] = React.useState<React.ReactNode>(<></>);
     const [loading, setLoading] = React.useState<boolean>(false);
     const [footer, setFooter] = React.useState<string>("");
+    const [showAbout, setShowAbout] = React.useState<boolean>(false);
+    const [showSettings, setShowSettings] = React.useState<boolean>(false);
+    const [settings, setSettings] = React.useState<Settings>(new Settings());
 
     React.useEffect(() => {
         window.addEventListener("keyup", onKeyUp);
         return () => window.removeEventListener("keyup", onKeyUp);
     }, [])
+    let is_setup = false;
     React.useEffect(() => {
-        getMatches().then((matches) => {
-            if (matches.args.url.value) {
-                setUrlString(matches.args.url.value.toString());
-            } else {
-                const lines = [
-                    "```",
-                    "       _   _               _           _",
-                    "      {_} {_}             {_}         {_}",
-                    "       _   _   _ __ ___    _   _ __    _ ",
-                    "      | | | | | '_ ` _ \\  | | | '_ \\  | |",
-                    "      | | | | | | | | | | | | | | | | | |",
-                    "  _   | | |_| |_| |_| |_| |_| |_| |_| |_|",
-                    " | |__| |",
-                    "  \\____/        A Gemini Protocol Browser",
-                    "```"
-                ];
-                localSuccess(lines.join("\n"));
-            }
-        })
-        return () => setUrlString("");
+        const readSettings = async () => {
+            if (is_setup) return;
+            SettingsIO.read()
+                .then(value => {
+                    setSettings(value);
+                    getMatches().then((matches) => {
+                        // If there's a URL on the command line, open it
+                        if (matches.args.url.value) {
+                            setUrlString(matches.args.url.value.toString());
+                        }
+                        // Else, if there's a home URL in the settings, open it
+                        else if (value.homeUrlString) {
+                            setUrlString(value.homeUrlString)
+                        }
+                    })
+                })
+        }
+        readSettings().catch(e => console.error(e));
+        return () => {
+            is_setup = true;
+        }
     }, [])
     React.useEffect(() => {
+        const writeSettings = async () => {
+            if (settings) await SettingsIO.write(settings);
+        }
+        if (settings) {
+            setSettings(settings);
+            writeSettings().catch(e => console.error(e))
+        }
+    }, [settings])
+    React.useEffect(() => {
         if (urlString) {
-            makeRequest().then();
+            // If there's no protocol, make it gemini
+            const split = urlString.split("://", 2);
+            if (split.length < 2) {
+                setUrlString(`gemini://${urlString}`)
+            } else {
+                makeRequest().catch(e => console.error(e));
+            }
         }
     }, [urlString]);
 
-    const localSuccess = (message: string) => {
-        const body = [];
-        for (let i = 0; i < message.length; ++i) {
-            body.push(message.charCodeAt(i))
-        }
-        const successResult: SuccessResult = ({
-            code: "20",
-            status: "20 text/gemini",
-            mime_type: "text/gemini",
-            body: body
-        }) as SuccessResult;
-        setSuccess(new Success(successResult))
-    }
     const makeRequest = async () => {
         setLoading(true);
 
@@ -117,6 +129,22 @@ function App() {
                 .catch(error => setGeminiError(error));
         }
     }
+    const saveDocument = () => {
+        const getSuggestedFileName = (urlString: string, success: Success) => {
+            if (success.isGemini()) {
+                const geminiExtension = ".gmi";
+                return urlString.endsWith(geminiExtension) ? urlString : `${urlString}${geminiExtension}`;
+            }
+            if (success.isText()) {
+                const textExtension = ".txt";
+                return urlString.endsWith(textExtension) ? urlString : `${urlString}${textExtension}`;
+            }
+            return urlString;
+        }
+        if (success && success.body) {
+            saveOctets(Util.toUrl(getSuggestedFileName(urlString, success)), success.body);
+        }
+    }
     const saveOctets = (url: URL, octets: number[]) => {
         const getSavePath = async (url: URL) => {
             const suggestedFilename = url.toString();
@@ -144,15 +172,14 @@ function App() {
         }
     }
     const onUrlKeyUp = async (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === "Enter") {
+        if (event.key === "Enter" && urlInputString.length !== 0) {
             event.preventDefault();
             doRequest();
         }
     }
     const doRequest = () => {
         setNoHistory(false);
-        const split = urlInputString.split("://", 2);
-        setUrlString(split.length < 2 ? `gemini://${urlInputString}` : urlInputString);
+        setUrlString(urlInputString);
     }
     const setResult = (result: GeminiResponse, url: URL) => {
         if (result.prompt) {
@@ -172,25 +199,24 @@ function App() {
             if (!noHistory) {
                 urlHistory.add(url);
             }
-            if (success.isGemini() || success.isText()) {
+            if (success.isGemini() || success.isText() || success.isImage()) {
                 setSuccess(success);
-            } else if (success.isImage()) {
-                Tauri.base64_encode(success.body)
-                    .then(data => {
-                        setInlineImageSrc(`data:${success.mimeType?.toString()};base64,${data}`);
-                    })
+                if (success.isImage()) {
+                    Tauri.base64_encode(success.body)
+                        .then(data => {
+                            setInlineImageSrc(`data:${success.mimeType?.toString()};base64,${data}`);
+                        })
+                    setSuccess(success);
+                }
             } else {
-                // localSuccess(`### Can't display MIME type "${success.mimeType}"\n`);
                 setInfo(`Can't display MIME type "${success.mimeType}"\n`)
                 saveOctets(url, success.body);
             }
-        }
-        else if (result.redirect) {
+        } else if (result.redirect) {
             const redirect = new Redirect(result.redirect);
             setNoHistory(!redirect.isPermanent());
             setUrlString(new URL(redirect.url, urlString).toString());
-        }
-        else if (result.failure) {
+        } else if (result.failure) {
             const failure = new Failure(result.failure);
             if (!noHistory) {
                 urlHistory.add(url);
@@ -202,7 +228,6 @@ function App() {
                 urlHistory.add(url);
             }
             setInfo(`Unsupported response: ${certificate.toString()}`);
-
         }
     }
 
@@ -222,6 +247,11 @@ function App() {
             }
         } else setFooter("");
     }
+    const formatSuccess = (success: Success) => {
+        if (success.isGemini()) return formatGeminiSuccess(success);
+        if (success.isText()) return formatPlainSuccess(success);
+        return <></>
+    }
     const formatGeminiSuccess = (success: Success) => {
         let preformattedChildren: React.ReactNode[] = [];
         let preformat = false;
@@ -240,16 +270,21 @@ function App() {
             } else switch (geminiLine.type) {
                 case LineType.Link:
                     const jimini_link = JiminiLink.parseString(geminiLine.text ?? "");
-                    const link = new URL(jimini_link.link, urlInputString);
-                    let className = "link";
-                    if (link.protocol !== "gemini:") className += " foreign-link";
-                    lines.push(<div key={index}>
+                    try {
+                        const link = new URL(jimini_link.link, urlString);
+                        let className = "link";
+                        if (link.protocol !== "gemini:") className += " foreign-link";
+                        lines.push(<div key={index}>
                         <span className={className} data-link={jimini_link.link}
                               onMouseEnter={e => onLinkHover(e.target as HTMLElement, true)}
                               onMouseLeave={e => onLinkHover(e.target as HTMLElement, false)}
                               onClick={e => onLinkClick(e.target as HTMLElement)}>{jimini_link.name}
                         </span>
-                    </div>);
+                        </div>);
+                    } catch (e) {
+                        console.error(e)
+                        break; // This is so invalid URLs don't crash the app
+                    }
                     break;
                 case LineType.Heading1:
                     lines.push(<h1 key={index}>{geminiLine.text}</h1>);
@@ -274,19 +309,6 @@ function App() {
     }
     const formatPlainSuccess = (success: Success) => {
         return <div className="plain">{success.lines().map((line, index) => <div key={index}>{line}</div>)}</div>
-    }
-    const formatSuccess = () => {
-        return <div
-            id="success">{success ? success.isGemini() ? formatGeminiSuccess(success) : formatPlainSuccess(success) : <></>}</div>
-    }
-    const formatError = () => {
-        return geminiError ? <p id="gemini_error">{geminiError}</p> : <></>;
-    }
-    const formatImage = () => {
-        return inlineImageSrc ? <img alt={urlString} src={inlineImageSrc}/> : <></>;
-    }
-    const formatInfo = () => {
-        return info ? <p id="info">{info}</p> : <></>
     }
     const previous = () => {
         let previousUrl = urlHistory.previousUrl();
@@ -319,8 +341,28 @@ function App() {
         finishInput();
         setUrlString(urlHistory.currentUrl()?.toString() ?? "");
     }
-    return (<>
+    const colorSchemeClass = () => {
+        const colorScheme = settings.colorScheme == ColorScheme.SYSTEM
+            ? Util.preferredColorScheme()
+            : settings.colorScheme;
+        return colorScheme == ColorScheme.DARK
+            ? "dark-scheme"
+            : "light-scheme"
+    }
+    const fontSizeClass = () => {
+        if (settings.textSize == TextSize.SMALL) return "smaller-text";
+        if (settings.textSize == TextSize.LARGE) return "larger-text";
+        return "";
+    }
+    const wrapperClass = () => {
+        const class1 = colorSchemeClass();
+        const class2 = fontSizeClass();
+        return class2 ? `${class1} ${class2}` : class1;
+    }
+    return (<div id={"wrapper"} className={wrapperClass()}>
         <header>
+            <HamburgerMenu onSave={saveDocument} onSettings={() => setShowSettings(true)}
+                           onShowAbout={() => setShowAbout(true)}/>
             <button id="previous-button" className="nav-button" onClick={previous}
                     disabled={!urlHistory.hasPreviousUrl()}>{<svg>
                 <use href="#caret-up"/>
@@ -337,27 +379,34 @@ function App() {
             <button onClick={doRequest} disabled={urlInputString.length === 0}>Go</button>
         </header>
         <div className="container">
-            <div className={loading ? "loading" : "not-loading"}>Loading...</div>
-            {formatInfo()}
-            {formatError()}
-            {formatSuccess()}
-            {formatImage()}
-            <InputDialog
-                isOpen={promptForInput || promptForSensitiveInput}
-                onInput={onInput}
-                onCancel={onInputCancel}
-                dialogContent={dialogContent}
-                isSensitive={promptForSensitiveInput}
-            />
+            {loading && <div className="loading">Loading...</div>}
+            {info && <p id={"info"}>{info}</p>}
+            {geminiError && <p id="gemini_error">{geminiError}</p>}
+            {success && formatSuccess(success)}
+            {inlineImageSrc && <img alt={urlString} src={inlineImageSrc}/>}
         </div>
         <footer>{footer}</footer>
-        <svg style={{display: "none"}} xmlns="http://www.w3.org/2000/svg">
+        <InputDialog
+            isOpen={promptForInput || promptForSensitiveInput}
+            onInput={onInput}
+            onCancel={onInputCancel}
+            dialogContent={dialogContent}
+            isSensitive={promptForSensitiveInput}
+        />
+        <AboutDialog isOpen={showAbout} onCancel={() => setShowAbout(false)}/>
+        <SettingsDialog
+            isOpen={showSettings}
+            settings={settings}
+            urlString={urlString}
+            onChangeSettings={setSettings}
+            onCancel={() => setShowSettings(false)}/>
+        <svg xmlns="http://www.w3.org/2000/svg">
             <symbol id="caret-up" viewBox="0 0 16 16">
                 <path
                     d="M3.204 11h9.592L8 5.519 3.204 11zm-.753-.659 4.796-5.48a1 1 0 0 1 1.506 0l4.796 5.48c.566.647.106 1.659-.753 1.659H3.204a1 1 0 0 1-.753-1.659z"/>
             </symbol>
         </svg>
-    </>);
+    </div>);
 }
 
 export default App;

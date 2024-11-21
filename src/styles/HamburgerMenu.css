@@ -1,0 +1,27 @@
+#menu {
+    --menu-background-color: #ddd;
+    --menu-text-color: #222;
+    --menu-hover-background-color: #444;
+    --menu-hover-text-color: #eee;
+    --menu-spacer-color: #ddd;
+
+    cursor: pointer;
+    position: absolute;
+    top: var(--header-height);
+    z-index: 1;
+}
+
+#menu div {
+    padding: 0.25em 0.5em;
+    background-color: var(--menu-background-color);
+    color: var(--menu-text-color);
+}
+
+#menu div.spacer {
+    border-bottom: 1px solid var(--menu-spacer-color);
+}
+
+#menu div:hover {
+    background-color: var(--menu-hover-background-color);
+    color: var(--menu-hover-text-color);
+}

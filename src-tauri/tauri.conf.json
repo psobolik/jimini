@@ -12,12 +12,13 @@
   },
   "tauri": {
     "allowlist": {
-      "all": false,
       "path": {
         "all": true
       },
       "fs": {
         "all": false,
+        "scope": ["$APPCONFIG/*", "$APPDATA/**/*"],
+        "readFile": true,
         "writeFile": true
       },
       "dialog": {
@@ -27,7 +28,7 @@
     },
     "cli": {
       "description": "Jimini",
-      "longDescription": "",
+      "longDescription": "A Gemini Browser",
       "beforeHelp": "",
       "afterHelp": "",
       "args": [
@@ -42,7 +43,9 @@
       {
         "title": "Jimini",
         "width": 800,
-        "height": 800
+        "height": 800,
+        "minWidth": 400,
+        "minHeight": 400
       }
     ],
     "security": {
@@ -51,7 +54,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "psobolik.jimini.app",
+      "identifier": "psobolik_jimini",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",

@@ -1425,8 +1425,6 @@ dependencies = [
  "base64 0.22.1",
  "gemini-lib",
  "open",
- "serde",
- "serde_json",
  "tauri",
  "tauri-build",
  "url",
