@@ -41,9 +41,9 @@ const HamburgerMenu: React.FunctionComponent<MenuProps> = (props) => {
     }
     return <>
         <button id={"menu-button"} className={"nav-button"} onClick={toggleMenu}>{<svg>
-            <use href="#h-line" y="3"/>
-            <use href="#h-line" y="7"/>
-            <use href="#h-line" y="11"/>
+            <use href="#h-line" y="1"/>
+            <use href="#h-line" y="5"/>
+            <use href="#h-line" y="9"/>
         </svg>}
         </button>
         {isMenuVisible && <div id={"menu"}>

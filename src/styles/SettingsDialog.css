@@ -1,17 +1,18 @@
 #settings-dialog {
     width: 15em;
-}
-#settings-dialog fieldset {
-    width: 5em;
-    margin-bottom: 0.5em;
-}
-#settings-dialog fieldset input:is([type="radio"], [type="checkbox"]) {
-    margin-right: 0.325em;
-}
-#settings-dialog a {
-    font-size: small;
-    color: var(--link-color);
-}
-#settings-dialog a:last-child {
-    float: right;
+    & fieldset {
+        width: 5em;
+        margin: 0.5em;
+
+        & input:is([type="radio"], [type="checkbox"]) {
+            margin-right: 0.325em;
+        }
+         & a {
+             font-size: small;
+             color: var(--link-color);
+         }
+        & a:last-child {
+            float: right;
+        }
+    }
 }

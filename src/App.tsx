@@ -5,7 +5,6 @@ import {getMatches} from "@tauri-apps/api/cli";
 import {downloadDir} from "@tauri-apps/api/path";
 import {save} from "@tauri-apps/api/dialog";
 import {writeBinaryFile} from "@tauri-apps/api/fs";
-import {path} from "@tauri-apps/api";
 import Certificate from "./Data/Certificate.ts";
 import Redirect from "./Data/Redirect.ts";
 import Failure from "./Data/Failure.ts";
@@ -313,6 +312,10 @@ function App() {
     const formatPlainSuccess = (success: Success) => {
         return <div className="plain">{success.lines().map((line, index) => <div key={index}>{line}</div>)}</div>
     }
+    const home = () => {
+        if (settings.homeUrlString === urlString) return;
+        setUrlString(settings.homeUrlString)
+    }
     const previous = () => {
         let previousUrl = urlHistory.previousUrl();
         if (previousUrl) {
@@ -359,53 +362,64 @@ function App() {
         return class2 ? `${class1} ${class2}` : class1;
     }
     return (<div id={"wrapper"} className={wrapperClass()}>
-        <header>
-            <HamburgerMenu onSave={saveDocument} onSettings={() => setShowSettings(true)}
-                           onShowAbout={() => setShowAbout(true)}/>
-            <button id="previous-button" className="nav-button" onClick={previous}
-                    disabled={!urlHistory.hasPreviousUrl()}>{<svg>
-                <use href="#caret-up"/>
-            </svg>}
-            </button>
-            <button id="next-button" className="nav-button" onClick={next} disabled={!urlHistory.hasNextUrl()}>{<svg>
-                <use href="#caret-up"/>
-            </svg>}</button>
-            <input type="text" placeholder="Gemini URL" id="gemini-url-input"
-                   value={urlInputString}
-                   onChange={e => setUrlInputString(e.target.value)}
-                   onKeyUp={onUrlKeyUp}
+            <header>
+                <HamburgerMenu onSave={saveDocument} onSettings={() => setShowSettings(true)}
+                               onShowAbout={() => setShowAbout(true)}/>
+                <button id={"home-button"} className={"nav-button"} onClick={home}
+                        disabled={settings.homeUrlString.length === 0}>{<svg>
+                    <polygon
+                        points="8,0 15,7 12,7 12,12, 9,12, 9,9 6,9 6,12, 3,12 3,7 0,7 7,0"
+                        stroke-linejoin="round"
+                    />
+                </svg>}
+                </button>
+                <button id="previous-button" className="nav-button" onClick={previous}
+                        disabled={!urlHistory.hasPreviousUrl()}>{<svg>
+                    <use href="#caret-up"/>
+                </svg>}
+                </button>
+                <button id="next-button" className="nav-button" onClick={next} disabled={!urlHistory.hasNextUrl()}>{
+                    <svg>
+                        <use href="#caret-up"/>
+                    </svg>}</button>
+                <input type="text" placeholder="Gemini URL" id="gemini-url-input"
+                       value={urlInputString}
+                       onChange={e => setUrlInputString(e.target.value)}
+                       onKeyUp={onUrlKeyUp}
+                />
+                <button onClick={doRequest} disabled={urlInputString.length === 0}>Go</button>
+            </header>
+            <div className="container">
+                {loading && <div className="loading">Loading...</div>}
+                {info && <p id={"info"}>{info}</p>}
+                {geminiError && <p id="gemini_error">{geminiError}</p>}
+                {success && formatSuccess(success)}
+                {inlineImageSrc && <img alt={urlString} src={inlineImageSrc}/>}
+            </div>
+            <footer>{footer}</footer>
+            <InputDialog
+                isOpen={promptForInput || promptForSensitiveInput}
+                onInput={onInput}
+                onCancel={onInputCancel}
+                dialogContent={dialogContent}
+                isSensitive={promptForSensitiveInput}
             />
-            <button onClick={doRequest} disabled={urlInputString.length === 0}>Go</button>
-        </header>
-        <div className="container">
-            {loading && <div className="loading">Loading...</div>}
-            {info && <p id={"info"}>{info}</p>}
-            {geminiError && <p id="gemini_error">{geminiError}</p>}
-            {success && formatSuccess(success)}
-            {inlineImageSrc && <img alt={urlString} src={inlineImageSrc}/>}
-        </div>
-        <footer>{footer}</footer>
-        <InputDialog
-            isOpen={promptForInput || promptForSensitiveInput}
-            onInput={onInput}
-            onCancel={onInputCancel}
-            dialogContent={dialogContent}
-            isSensitive={promptForSensitiveInput}
-        />
-        <AboutDialog isOpen={showAbout} onCancel={() => setShowAbout(false)}/>
-        <SettingsDialog
-            isOpen={showSettings}
-            settings={settings}
-            urlString={urlString}
-            onChangeSettings={setSettings}
-            onCancel={() => setShowSettings(false)}/>
-        <svg xmlns="http://www.w3.org/2000/svg">
-            <symbol id="caret-up" viewBox="0 0 16 16">
-                <path
-                    d="M3.204 11h9.592L8 5.519 3.204 11zm-.753-.659 4.796-5.48a1 1 0 0 1 1.506 0l4.796 5.48c.566.647.106 1.659-.753 1.659H3.204a1 1 0 0 1-.753-1.659z"/>
-            </symbol>
-        </svg>
-    </div>);
+            <AboutDialog isOpen={showAbout} onCancel={() => setShowAbout(false)}/>
+            <SettingsDialog
+                isOpen={showSettings}
+                settings={settings}
+                urlString={urlString}
+                onChangeSettings={setSettings}
+                onCancel={() => setShowSettings(false)}/>
+            <svg xmlns="http://www.w3.org/2000/svg">
+                <symbol id={"caret-up"}>
+                    <polygon
+                        points="8,4 14,12 0,12"
+                        stroke-linejoin="round"
+                    />
+                </symbol>
+            </svg>
+        </div>);
 }
 
 export default App;

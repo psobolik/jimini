@@ -14,11 +14,12 @@
     & a {
         padding: 0.25em 0.5em;
         background-color: var(--menu-background-color);
-        color: var(--menu-text-color)
+        color: var(--menu-text-color);
+        text-decoration: none;
     }
     & a:hover, a:focus {
         outline: 0;
         background-color: var(--menu-hover-background-color);
-        color: var(--menu-hover-text-color)
+        color: var(--menu-hover-text-color);
     }
 }
