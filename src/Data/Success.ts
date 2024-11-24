@@ -17,6 +17,12 @@ export default class Success {
         this.mimeType = GeminiMimeType.fromContentType(successResult.mime_type);
         this.body = successResult.body;
     }
+    public isTextLike = (): boolean => {
+        return this.isText() || this.isXml();
+    }
+    public isXml = (): boolean => {
+        return this.mimeType?.subtype === "xml";
+    }
     public isText = (): boolean => {
         return this.mimeType?.type === "text";
     }

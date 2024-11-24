@@ -199,7 +199,7 @@ function App() {
             if (!noHistory) {
                 urlHistory.add(url);
             }
-            if (success.isGemini() || success.isText() || success.isImage()) {
+            if (success.isGemini() || success.isTextLike() || success.isImage()) {
                 setSuccess(success);
                 if (success.isImage()) {
                     Tauri.base64_encode(success.body)
@@ -249,7 +249,7 @@ function App() {
     }
     const formatSuccess = (success: Success) => {
         if (success.isGemini()) return formatGeminiSuccess(success);
-        if (success.isText()) return formatPlainSuccess(success);
+        if (success.isTextLike()) return formatPlainSuccess(success);
         return <></>
     }
     const formatGeminiSuccess = (success: Success) => {
