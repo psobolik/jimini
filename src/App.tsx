@@ -275,11 +275,14 @@ function App() {
                         let className = "link";
                         if (link.protocol !== "gemini:") className += " foreign-link";
                         lines.push(<div key={index}>
-                        <span className={className} data-link={jimini_link.link}
-                              onMouseEnter={e => onLinkHover(e.target as HTMLElement, true)}
-                              onMouseLeave={e => onLinkHover(e.target as HTMLElement, false)}
-                              onClick={e => onLinkClick(e.target as HTMLElement)}>{jimini_link.name}
-                        </span>
+                            <a href={"#"} className={className} data-link={jimini_link.link}
+                               onFocus={e => onLinkHover(e.target as HTMLElement, true)}
+                               onBlur={e => onLinkHover(e.target as HTMLElement, false)}
+                               onMouseEnter={e => onLinkHover(e.target as HTMLElement, true)}
+                               onMouseLeave={e => onLinkHover(e.target as HTMLElement, false)}
+                               onClick={e => onLinkClick(e.target as HTMLElement)}>
+                                {jimini_link.name}
+                            </a>
                         </div>);
                     } catch (e) {
                         console.error(e)
@@ -342,12 +345,8 @@ function App() {
         setUrlString(urlHistory.currentUrl()?.toString() ?? "");
     }
     const colorSchemeClass = () => {
-        const colorScheme = settings.colorScheme == ColorScheme.SYSTEM
-            ? Util.preferredColorScheme()
-            : settings.colorScheme;
-        return colorScheme == ColorScheme.DARK
-            ? "dark-scheme"
-            : "light-scheme"
+        const colorScheme = settings.colorScheme == ColorScheme.SYSTEM ? Util.preferredColorScheme() : settings.colorScheme;
+        return colorScheme == ColorScheme.DARK ? "dark-scheme" : "light-scheme"
     }
     const fontSizeClass = () => {
         if (settings.textSize == TextSize.SMALL) return "smaller-text";

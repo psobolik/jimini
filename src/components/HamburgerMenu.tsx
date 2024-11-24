@@ -13,12 +13,25 @@ const HamburgerMenu: React.FunctionComponent<MenuProps> = (props) => {
     React.useEffect(() => {
         if (isMenuVisible) {
             window.addEventListener('click', hideMenu);
+            addFocusListeners();
         } else {
-            window.removeEventListener('click', hideMenu)
+            window.removeEventListener('click', hideMenu);
+            removeFocusListeners();
         }
-        return () => window.removeEventListener('click', hideMenu);
+        return () => {
+            window.removeEventListener('click', hideMenu);
+            removeFocusListeners();
+        }
     }, [isMenuVisible, setIsMenuVisible]);
 
+    const addFocusListeners = () => {
+        const elements = document.querySelectorAll(":not(#menu a)");
+        elements.forEach(element => element.addEventListener('focus', hideMenu));
+    }
+    const removeFocusListeners = () => {
+        const elements = document.querySelectorAll(":not(#menu a)");
+        elements.forEach(element => element.removeEventListener('focus', hideMenu));
+    }
     const hideMenu = () => {
         setIsMenuVisible(false)
     }
@@ -34,9 +47,9 @@ const HamburgerMenu: React.FunctionComponent<MenuProps> = (props) => {
         </svg>}
         </button>
         {isMenuVisible && <div id={"menu"}>
-            <div onClick={props.onSave} className={"spacer"}>Save as...</div>
-            <div onClick={props.onSettings} className={"spacer"}>Settings</div>
-            <div onClick={props.onShowAbout}>About</div>
+            <a href="#" onClick={props.onSave}>Save as...</a>
+            <a href="#" onClick={props.onSettings}>Settings</a>
+            <a href="#" onClick={props.onShowAbout}>About</a>
         </div>}
         <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
             <symbol id="h-line" viewBox="0 0 16 16">
