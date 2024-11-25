@@ -40,10 +40,10 @@ const HamburgerMenu: React.FunctionComponent<MenuProps> = (props) => {
         setIsMenuVisible(!isMenuVisible);
     }
     return <>
-        <button id={"menu-button"} className={"nav-button"} onClick={toggleMenu}>{<svg>
-            <use href="#h-line" y="1"/>
-            <use href="#h-line" y="5"/>
-            <use href="#h-line" y="9"/>
+        <button id={"menu-button"} className={"nav-button"} onClick={toggleMenu}>{<svg viewBox="0 0 26 26">
+            <use href="#horizontal-line" y="5"/>
+            <use href="#horizontal-line" y="12"/>
+            <use href="#horizontal-line" y="19"/>
         </svg>}
         </button>
         {isMenuVisible && <div id={"menu"}>
@@ -51,9 +51,9 @@ const HamburgerMenu: React.FunctionComponent<MenuProps> = (props) => {
             <a href="#" onClick={props.onSettings}>Settings</a>
             <a href="#" onClick={props.onShowAbout}>About</a>
         </div>}
-        <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-            <symbol id="h-line" viewBox="0 0 16 16">
-                <line x1="1" y1="1" x2="15" y2="1" strokeLinecap="round"/>
+        <svg xmlns="http://www.w3.org/2000/svg">
+            <symbol id="horizontal-line">
+                <line x1="1" y1="1" x2="25" y2="1" strokeLinecap="round"/>
             </symbol>
         </svg>
     </>

@@ -362,64 +362,64 @@ function App() {
         return class2 ? `${class1} ${class2}` : class1;
     }
     return (<div id={"wrapper"} className={wrapperClass()}>
-            <header>
-                <HamburgerMenu onSave={saveDocument} onSettings={() => setShowSettings(true)}
-                               onShowAbout={() => setShowAbout(true)}/>
-                <button id={"home-button"} className={"nav-button"} onClick={home}
-                        disabled={settings.homeUrlString.length === 0}>{<svg>
-                    <polygon
-                        points="8,0 15,7 12,7 12,12, 9,12, 9,9 6,9 6,12, 3,12 3,7 0,7 7,0"
-                        stroke-linejoin="round"
-                    />
-                </svg>}
-                </button>
-                <button id="previous-button" className="nav-button" onClick={previous}
-                        disabled={!urlHistory.hasPreviousUrl()}>{<svg>
-                    <use href="#caret-up"/>
-                </svg>}
-                </button>
-                <button id="next-button" className="nav-button" onClick={next} disabled={!urlHistory.hasNextUrl()}>{
-                    <svg>
-                        <use href="#caret-up"/>
-                    </svg>}</button>
-                <input type="text" placeholder="Gemini URL" id="gemini-url-input"
-                       value={urlInputString}
-                       onChange={e => setUrlInputString(e.target.value)}
-                       onKeyUp={onUrlKeyUp}
+        <header>
+            <HamburgerMenu onSave={saveDocument} onSettings={() => setShowSettings(true)}
+                           onShowAbout={() => setShowAbout(true)}/>
+            <button id={"home-button"} className={"nav-button"} onClick={home}
+                    disabled={settings.homeUrlString.length === 0}>{<svg viewBox="0 0 26 26">
+                <polygon
+                    points="13,3 25,14 20,14 20,22 15,22 15,17 11,17 11,22 6,22 6,14 1,14"
+                    stroke-linejoin="round"
                 />
-                <button onClick={doRequest} disabled={urlInputString.length === 0}>Go</button>
-            </header>
-            <div className="container">
-                {loading && <div className="loading">Loading...</div>}
-                {info && <p id={"info"}>{info}</p>}
-                {geminiError && <p id="gemini_error">{geminiError}</p>}
-                {success && formatSuccess(success)}
-                {inlineImageSrc && <img alt={urlString} src={inlineImageSrc}/>}
-            </div>
-            <footer>{footer}</footer>
-            <InputDialog
-                isOpen={promptForInput || promptForSensitiveInput}
-                onInput={onInput}
-                onCancel={onInputCancel}
-                dialogContent={dialogContent}
-                isSensitive={promptForSensitiveInput}
+            </svg>}
+            </button>
+            <button id="previous-button" className="nav-button" onClick={previous}
+                    disabled={!urlHistory.hasPreviousUrl()}>{<svg viewBox="0 0 26 26">
+                <use href="#triangle" transform="rotate(-90, 13, 13)"/>
+            </svg>}
+            </button>
+            <button id="next-button" className="nav-button" onClick={next} disabled={!urlHistory.hasNextUrl()}>{<svg
+                viewBox="0 0 26 26">
+                <use href="#triangle" transform="rotate(90, 13, 13)"/>
+            </svg>}</button>
+            <input type="text" placeholder="Gemini URL" id="gemini-url-input"
+                   value={urlInputString}
+                   onChange={e => setUrlInputString(e.target.value)}
+                   onKeyUp={onUrlKeyUp}
             />
-            <AboutDialog isOpen={showAbout} onCancel={() => setShowAbout(false)}/>
-            <SettingsDialog
-                isOpen={showSettings}
-                settings={settings}
-                urlString={urlString}
-                onChangeSettings={setSettings}
-                onCancel={() => setShowSettings(false)}/>
-            <svg xmlns="http://www.w3.org/2000/svg">
-                <symbol id={"caret-up"}>
-                    <polygon
-                        points="8,4 14,12 0,12"
-                        stroke-linejoin="round"
-                    />
-                </symbol>
-            </svg>
-        </div>);
+            <button onClick={doRequest} disabled={urlInputString.length === 0}>Go</button>
+        </header>
+        <div className="container">
+            {loading && <div className="loading">Loading...</div>}
+            {info && <p id={"info"}>{info}</p>}
+            {geminiError && <p id="gemini_error">{geminiError}</p>}
+            {success && formatSuccess(success)}
+            {inlineImageSrc && <img alt={urlString} src={inlineImageSrc}/>}
+        </div>
+        <footer>{footer}</footer>
+        <InputDialog
+            isOpen={promptForInput || promptForSensitiveInput}
+            onInput={onInput}
+            onCancel={onInputCancel}
+            dialogContent={dialogContent}
+            isSensitive={promptForSensitiveInput}
+        />
+        <AboutDialog isOpen={showAbout} onCancel={() => setShowAbout(false)}/>
+        <SettingsDialog
+            isOpen={showSettings}
+            settings={settings}
+            urlString={urlString}
+            onChangeSettings={setSettings}
+            onCancel={() => setShowSettings(false)}/>
+        <svg xmlns="http://www.w3.org/2000/svg">
+            <symbol id="triangle">
+                <polygon
+                    points="13,3 25,19 1,19"
+                    stroke-linejoin="round"
+                />
+            </symbol>
+        </svg>
+    </div>);
 }
 
 export default App;
