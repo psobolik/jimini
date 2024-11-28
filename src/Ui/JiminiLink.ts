@@ -20,7 +20,4 @@ export default class JiminiLink {
         }
         return new JiminiLink(link.trim(), name ? name.trim() : link.trim());
     }
-    isGeminiLink(): boolean  {
-        return this.link.startsWith("gemini:");
-    }
 }

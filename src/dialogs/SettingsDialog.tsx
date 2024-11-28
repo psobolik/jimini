@@ -4,7 +4,7 @@ import {ColorScheme, Settings, TextSize} from "../Data/Settings.ts";
 
 interface SettingsDialogProps {
     settings: Settings;
-    onChangeSettings: (Settings) => void;
+    onChangeSettings: (settings: Settings) => void;
     urlString: string;
     isOpen: boolean;
     onCancel: () => void;
@@ -38,28 +38,30 @@ const SettingsDialog: React.FunctionComponent<SettingsDialogProps> = (props) => 
         if (props.onCancel) props.onCancel();
         setShowDialog(false);
     }
-    const onTextSizeChange = (evt) => {
-        if (props.settings.textSize == evt.target.value) return;
+    const onTextSizeChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+        const newTextSize = Number(evt.target.value);
+        if (props.settings.textSize == newTextSize) return;
 
-        let newSettings = new Settings(settings.colorScheme, settings.homeUrlString, evt.target.value);
+        let newSettings = new Settings(settings.colorScheme, settings.homeUrlString, newTextSize);
         setSettings(newSettings);
         props.onChangeSettings(newSettings);
     }
-    const onColorSchemeChange = (evt) => {
-        if (props.settings.colorScheme == evt.target.value) return;
+    const onColorSchemeChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+        const newColorScheme = Number(evt.target.value);
+        if (props.settings.colorScheme == newColorScheme) return;
 
-        let newSettings = new Settings(evt.target.value, settings.homeUrlString, settings.textSize);
+        let newSettings = new Settings(newColorScheme, settings.homeUrlString, settings.textSize);
         setSettings(newSettings);
         props.onChangeSettings(newSettings);
     }
-    const setHomeUrlString = (value) => {
+    const setHomeUrlString = (value: string) => {
         if (props.settings.homeUrlString == value) return;
 
         let newSettings = new Settings(settings.colorScheme, value, settings.textSize);
         setSettings(newSettings);
         props.onChangeSettings(newSettings);
     }
-    const onHomeChanged = (evt) => {
+    const onHomeChanged = (evt: React.ChangeEvent<HTMLInputElement>) => {
         setHomeUrlString(evt.target.value);
     }
     const onClearHome = () => {

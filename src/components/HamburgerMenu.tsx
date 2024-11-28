@@ -35,7 +35,7 @@ const HamburgerMenu: React.FunctionComponent<MenuProps> = (props) => {
     const hideMenu = () => {
         setIsMenuVisible(false)
     }
-    const toggleMenu = (ev) => {
+    const toggleMenu = (ev: React.MouseEvent) => {
         ev.stopPropagation();
         setIsMenuVisible(!isMenuVisible);
     }
