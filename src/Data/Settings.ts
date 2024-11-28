@@ -1,4 +1,4 @@
-import {BaseDirectory, readTextFile, writeTextFile} from "@tauri-apps/api/fs";
+import {BaseDirectory, exists, createDir, readTextFile, writeTextFile} from "@tauri-apps/api/fs";
 import {appConfigDir} from "@tauri-apps/api/path";
 
 export enum ColorScheme {
@@ -35,15 +35,10 @@ export class SettingsIO {
     }
     public static write = async (settings: Settings) => {
         const dir = await appConfigDir();
+        if (! await exists(dir)) {
+            await createDir(dir, { recursive: true });
+        }
         const json = JSON.stringify(settings);
         await writeTextFile(`${dir}settings.json`, json)
     }
-    // I don't know why the following doesn't work, but it
-    // says, "path not allowed on the configured scope: settings.json".
-    // Calling readTextFile as above has no problems, and I am specifying
-    // both readFile and writeFile permissions in tauri.conf.json.
-    // public static write = async () => {
-    //     const settings = JSON.stringify(this);
-    //     await writeTextFile('settings.json', settings, { dir: BaseDirectory.AppConfig })
-    // }
 }

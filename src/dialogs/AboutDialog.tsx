@@ -37,6 +37,7 @@ const AboutDialog: React.FunctionComponent<AboutDialogProps> = (props) => {
     }
 
     return <dialog
+        id={"about-dialog"}
         ref={modalRef}
         onKeyDown={onKeyDown}>
         <Logo/>

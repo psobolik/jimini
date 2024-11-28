@@ -17,9 +17,15 @@
       },
       "fs": {
         "all": false,
-        "scope": ["$APPCONFIG/*", "$APPDATA/**/*"],
+        "scope": [
+          "$CONFIG/**/*",
+          "$APPCONFIG/**/*",
+          "$APPLOCALDATA/**/*"
+        ],
         "readFile": true,
-        "writeFile": true
+        "writeFile": true,
+        "exists": true,
+        "createDir": true
       },
       "dialog": {
         "all": false,

@@ -1,7 +1,7 @@
 #settings-dialog {
-    width: 15em;
+    width: 25em;
     & fieldset {
-        width: 5em;
+        width: 8em;
         margin: 0.5em;
 
         & input:is([type="radio"], [type="checkbox"]) {

@@ -15,7 +15,7 @@ const Logo: React.FunctionComponent = () => {
     ];
 
     const markup = LogoLines.map((logoLine, index) => {
-        return <div key={index}>{logoLine}</div>
+        return <span key={index}>{logoLine}<br/></span>
     })
     return <pre>{markup}</pre>
 }

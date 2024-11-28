@@ -265,7 +265,7 @@ function App() {
                 }
                 preformat = !preformat;
             } else if (preformat) {
-                preformattedChildren.push(<div key={index}>{line}</div>);
+                preformattedChildren.push(<span key={index}>{line}<br/></span>);
             } else switch (geminiLine.type) {
                 case LineType.Link:
                     const jimini_link = JiminiLink.parseString(geminiLine.text ?? "");
@@ -369,7 +369,7 @@ function App() {
                     disabled={settings.homeUrlString.length === 0}>{<svg viewBox="0 0 26 26">
                 <polygon
                     points="13,3 25,14 20,14 20,22 15,22 15,17 11,17 11,22 6,22 6,14 1,14"
-                    stroke-linejoin="round"
+                    strokeLinejoin="round"
                 />
             </svg>}
             </button>
@@ -415,7 +415,7 @@ function App() {
             <symbol id="triangle">
                 <polygon
                     points="13,3 25,19 1,19"
-                    stroke-linejoin="round"
+                    strokeLinejoin="round"
                 />
             </symbol>
         </svg>
