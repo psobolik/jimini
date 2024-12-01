@@ -2,6 +2,7 @@ import React from "react";
 import Logo from "../components/Logo.tsx";
 import Version from "../components/Version.tsx";
 import Copyright from "../components/Copyright";
+import ClosePanel from "../components/ClosePanel.tsx";
 
 interface AboutDialogProps {
     isOpen: boolean;
@@ -36,16 +37,14 @@ const AboutDialog: React.FunctionComponent<AboutDialogProps> = (props) => {
         setShowAbout(false);
     }
 
-    return <dialog
+    return <dialog className={"with-close-panel"}
         id={"about-dialog"}
         ref={modalRef}
         onKeyDown={onKeyDown}>
+        <ClosePanel onClose={cancel}/>
         <Logo/>
         <Version/>
         <Copyright/>
-        <div className={"button-container"}>
-            <button onClick={cancel}>OK</button>
-        </div>
     </dialog>
 }
 export default AboutDialog;

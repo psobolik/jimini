@@ -411,11 +411,19 @@ function App() {
             urlString={urlString}
             onChangeSettings={setSettings}
             onCancel={() => setShowSettings(false)}/>
-        <svg xmlns="http://www.w3.org/2000/svg">
+        <svg className="symbol-set">
             <symbol id="triangle">
                 <polygon
                     points="13,3 25,19 1,19"
                     strokeLinejoin="round"
+                />
+            </symbol>
+            <symbol id="x">
+                <line x1="3" y1="3" x2="22" y2="22"
+                      stroke-linecap="round"
+                />
+                <line x1="22" y1="3" x2="3" y2="22"
+                      stroke-linecap="round"
                 />
             </symbol>
         </svg>

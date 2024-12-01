@@ -58,7 +58,7 @@
   --quote-border-color: #888;
   --quote-background-color: #e0e0e0;
 
-  --pre-background-color: #f0f0f0;
+  --pre-background-color: #ddd;
 
   --link-color: #0000ff;
   --foreign-link-color: #5072f8;
@@ -71,7 +71,7 @@
   --dialog-border-color: #00000050;
 
   --outline-color: #000;
-  --loading-color: #f0f000;
+  --loading-color: #f03800;
 }
 #wrapper.dark-scheme {
   --footer-border-color: #ffffff50;
@@ -195,9 +195,13 @@ button:disabled {
 img {
   scale: .9;
 }
+svg.symbol-set {
+  width: 0;
+  height: 0;
+}
 .container {
   margin: 0;
-  padding: var(--header-height) 0.5rem;
+  padding: calc(var(--header-height) * 1.5) 0.5rem 0;
   display: flex;
   flex-direction: column;
 }
@@ -296,6 +300,24 @@ dialog {
   padding: 1rem;
   border: solid 1px var(--dialog-border-color);
   border-radius: 0.25rem;
+
+  & .x-panel {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+  & button.close-button {
+    border: none;
+    background-color: transparent;
+
+    &.close-button svg {
+      stroke-width: 2;
+      fill: transparent;
+      stroke: var(--input-color);
+      width: 16px;
+      height: 16px;
+    }
+  }
 }
 dialog .button-container {
   column-gap: 0.15em;
@@ -305,6 +327,9 @@ dialog .button-container {
 dialog .button-container button {
   flex: 1;
   margin-top: 1.5em;
+}
+dialog.with-close-panel {
+  padding-top: 2em;
 }
 div .loading {
   text-align: center;
