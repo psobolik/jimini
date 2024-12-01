@@ -10,6 +10,7 @@
     z-index: 1;
     display: flex;
     flex-direction: column;
+    outline: 1px solid var(--menu-text-color);
 
     & a {
         padding: 0.25em 0.5em;

@@ -58,7 +58,7 @@
   --quote-border-color: #888;
   --quote-background-color: #e0e0e0;
 
-  --pre-background-color: #ddd;
+  --pre-background-color: #e8e8e8;
 
   --link-color: #0000ff;
   --foreign-link-color: #5072f8;
@@ -104,7 +104,7 @@
   --quote-border-color: #ffffff88;
   --quote-background-color: #0f0f0f77;
 
-  --pre-background-color: #ffffff22;
+  --pre-background-color: #383838;
 
   --link-color: #b9b8ea;
   --foreign-link-color: #d3dfff;
@@ -122,10 +122,11 @@
 html {
   position: relative;
   min-height: 100%;
+  background-color: #f6f6f6;
 }
 body {
   margin: 0;
-  background-color: #ccc;
+
 }
 header {
   background-color: var(--background-color);
@@ -311,6 +312,7 @@ dialog {
     background-color: transparent;
 
     &.close-button svg {
+      transform: translateY(4px);
       stroke-width: 2;
       fill: transparent;
       stroke: var(--input-color);
@@ -338,4 +340,10 @@ div .loading {
   font-size: larger;
   font-weight: bold;
   display: block;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    background-color: #2f2f2f;
+  }
 }
