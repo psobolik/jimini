@@ -301,12 +301,18 @@ dialog {
   padding: 1rem;
   border: solid 1px var(--dialog-border-color);
   border-radius: 0.25rem;
-
-  & .x-panel {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-  }
+}
+dialog .button-container {
+  column-gap: 0.15em;
+  display: flex;
+  flex-direction: row;
+}
+dialog .button-container button {
+  flex: 1;
+  margin-top: 1.5em;
+}
+div.x-panel {
+  text-align: end;
   & button.close-button {
     border: none;
     background-color: transparent;
@@ -320,18 +326,6 @@ dialog {
       height: 16px;
     }
   }
-}
-dialog .button-container {
-  column-gap: 0.15em;
-  display: flex;
-  flex-direction: row;
-}
-dialog .button-container button {
-  flex: 1;
-  margin-top: 1.5em;
-}
-dialog.with-close-panel {
-  padding-top: 2em;
 }
 div .loading {
   text-align: center;

@@ -1,9 +1,16 @@
-#menu {
-    --menu-background-color: #ddd;
+#wrapper.dark-scheme {
+    --menu-background-color: #222;
+    --menu-text-color: #ddd;
+    --menu-hover-background-color: #fff;
+    --menu-hover-text-color: #444;
+}
+#wrapper.light-scheme {
+    --menu-background-color: #eee;
     --menu-text-color: #222;
     --menu-hover-background-color: #444;
     --menu-hover-text-color: #eee;
-
+}
+#menu {
     cursor: pointer;
     position: absolute;
     top: calc(var(--header-height) + 4px);
@@ -13,7 +20,7 @@
     outline: 1px solid var(--menu-text-color);
 
     & a {
-        padding: 0.25em 0.5em;
+        padding: 0.25em 1em 0.25em 0.5em;
         background-color: var(--menu-background-color);
         color: var(--menu-text-color);
         text-decoration: none;

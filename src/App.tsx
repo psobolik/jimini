@@ -12,14 +12,18 @@ import Success from "./Data/Success.ts"
 import GeminiLine, {LineType} from "./Data/GeminiLine.ts";
 import GeminiResponse from "./Data/GeminiResponse.ts";
 import Prompt from "./Data/Prompt.ts";
-import {ColorScheme, Settings, SettingsIO, TextSize} from "./Data/Settings.ts";
+import {ColorScheme, Settings, TextSize} from "./Data/Settings.ts";
+import SettingsStore from "./Stores/SettingsStore.ts"
 import Util from "./Util.ts";
-import JiminiLink from "./Ui/JiminiLink.ts";
+import JiminiLink from "./Data/JiminiLink.ts";
 import UrlHistory from "./UrlHistory.ts";
 import InputDialog from "./dialogs/InputDialog.tsx";
 import AboutDialog from "./dialogs/AboutDialog.tsx";
 import SettingsDialog from "./dialogs/SettingsDialog.tsx";
 import HamburgerMenu from "./components/HamburgerMenu.tsx";
+import BookmarkPanel from "./components/BookmarkPanel.tsx";
+import BookmarkLinksStore from "./Stores/BookmarkLinksStore.ts";
+import Bookmark from "./Data/Bookmark.ts";
 
 function App() {
     const URL_HISTORY_CAPACITY = 20;
@@ -39,6 +43,7 @@ function App() {
     const [footer, setFooter] = React.useState<string>("");
     const [showAbout, setShowAbout] = React.useState<boolean>(false);
     const [showSettings, setShowSettings] = React.useState<boolean>(false);
+    const [showBookmarkPanel, setShowBookmarkPanel] = React.useState<boolean>(false);
     const [settings, setSettings] = React.useState<Settings>(new Settings());
 
     React.useEffect(() => {
@@ -49,7 +54,7 @@ function App() {
     React.useEffect(() => {
         const readSettings = async () => {
             if (is_setup) return;
-            SettingsIO.read()
+            SettingsStore.read()
                 .then(value => {
                     setSettings(value);
                     getMatches().then((matches) => {
@@ -71,10 +76,9 @@ function App() {
     }, [])
     React.useEffect(() => {
         const writeSettings = async () => {
-            if (settings) await SettingsIO.write(settings);
+            if (settings) await SettingsStore.write(settings);
         }
         if (settings) {
-            setSettings(settings);
             writeSettings().catch(e => console.error(e))
         }
     }, [settings])
@@ -312,6 +316,19 @@ function App() {
     const formatPlainSuccess = (success: Success) => {
         return <div className="plain">{success.lines().map((line, index) => <div key={index}>{line}</div>)}</div>
     }
+    const bookmark = () => {
+        BookmarkLinksStore.read().then(bookmarks => {
+            const isBookmarked = bookmarks.find(value => value.url === urlString)
+            if (!isBookmarked) {
+                setInfo("Added bookmark")
+                bookmarks.push(new Bookmark(urlString));
+                BookmarkLinksStore.write(bookmarks);
+            } else {
+                setInfo("Bookmarked")
+            }
+            setTimeout(() => setInfo(""), 1500);
+        })
+    }
     const home = () => {
         if (settings.homeUrlString === urlString) return;
         setUrlString(settings.homeUrlString)
@@ -347,6 +364,10 @@ function App() {
         finishInput();
         setUrlString(urlHistory.currentUrl()?.toString() ?? "");
     }
+    const onOpenUrl = (url: string) => {
+        setUrlString(url);
+        setShowBookmarkPanel(false);
+    }
     const colorSchemeClass = () => {
         const colorScheme = settings.colorScheme == ColorScheme.SYSTEM ? Util.preferredColorScheme() : settings.colorScheme;
         return colorScheme == ColorScheme.DARK ? "dark-scheme" : "light-scheme"
@@ -362,41 +383,53 @@ function App() {
         return class2 ? `${class1} ${class2}` : class1;
     }
     return (<div id={"wrapper"} className={wrapperClass()}>
-        <header>
-            <HamburgerMenu onSave={saveDocument} onSettings={() => setShowSettings(true)}
-                           onShowAbout={() => setShowAbout(true)}/>
-            <button id={"home-button"} className={"nav-button"} onClick={home}
-                    disabled={settings.homeUrlString.length === 0}>{<svg viewBox="0 0 26 26">
-                <polygon
-                    points="13,3 25,14 20,14 20,22 15,22 15,17 11,17 11,22 6,22 6,14 1,14"
-                    strokeLinejoin="round"
+        {showBookmarkPanel ? <BookmarkPanel openUrl={onOpenUrl} cancel={() => setShowBookmarkPanel(false)}/> : <>
+            <header>
+                <HamburgerMenu onSave={saveDocument} onSettings={() => setShowSettings(true)}
+                               onShowAbout={() => setShowAbout(true)}
+                               onShowBookmarkPanel={() => setShowBookmarkPanel(true)}
                 />
-            </svg>}
-            </button>
-            <button id="previous-button" className="nav-button" onClick={previous}
-                    disabled={!urlHistory.hasPreviousUrl()}>{<svg viewBox="0 0 26 26">
-                <use href="#triangle" transform="rotate(-90, 13, 13)"/>
-            </svg>}
-            </button>
-            <button id="next-button" className="nav-button" onClick={next} disabled={!urlHistory.hasNextUrl()}>{<svg
-                viewBox="0 0 26 26">
-                <use href="#triangle" transform="rotate(90, 13, 13)"/>
-            </svg>}</button>
-            <input type="text" placeholder="Gemini URL" id="gemini-url-input"
-                   value={urlInputString}
-                   onChange={e => setUrlInputString(e.target.value)}
-                   onKeyUp={onUrlKeyUp}
-            />
-            <button onClick={doRequest} disabled={urlInputString.length === 0}>Go</button>
-        </header>
-        <div className="container">
-            {loading && <div className="loading">Loading...</div>}
-            {info && <p id={"info"}>{info}</p>}
-            {geminiError && <p id="gemini_error">{geminiError}</p>}
-            {success && formatSuccess(success)}
-            {inlineImageSrc && <img alt={urlString} src={inlineImageSrc}/>}
-        </div>
-        <footer>{footer}</footer>
+                <button id={"home-button"} className={"nav-button"} onClick={home}
+                        disabled={settings.homeUrlString.length === 0}>{<svg viewBox="0 0 26 26">
+                    <polygon
+                        points="13,3 25,14 20,14 20,22 15,22 15,17 11,17 11,22 6,22 6,14 1,14"
+                        strokeLinejoin="round"
+                    />
+                </svg>}
+                </button>
+                <button id={"bookmark-button"} className={"nav-button"} onClick={bookmark}
+                        disabled={false}>{<svg viewBox="0 0 26 26">
+                    <polygon
+                        points="19,24 13,16 7,24 7,3 19,3"
+                        strokeLinejoin="round"
+                    />
+                </svg>}
+                </button>
+                <button id="previous-button" className="nav-button" onClick={previous}
+                        disabled={!urlHistory.hasPreviousUrl()}>{<svg viewBox="0 0 26 26">
+                    <use href="#triangle" transform="rotate(-90, 13, 13)"/>
+                </svg>}
+                </button>
+                <button id="next-button" className="nav-button" onClick={next} disabled={!urlHistory.hasNextUrl()}>{<svg
+                    viewBox="0 0 26 26">
+                    <use href="#triangle" transform="rotate(90, 13, 13)"/>
+                </svg>}</button>
+                <input type="text" placeholder="Gemini URL" id="gemini-url-input"
+                       value={urlInputString}
+                       onChange={e => setUrlInputString(e.target.value)}
+                       onKeyUp={onUrlKeyUp}
+                />
+                <button onClick={doRequest} disabled={urlInputString.length === 0}>Go</button>
+            </header>
+            <div className="container">
+                {loading && <div className="loading">Loading...</div>}
+                {info && <p id={"info"}>{info}</p>}
+                {geminiError && <p id="gemini_error">{geminiError}</p>}
+                {success && formatSuccess(success)}
+                {inlineImageSrc && <img alt={urlString} src={inlineImageSrc}/>}
+            </div>
+            <footer>{footer}</footer>
+        </>}
         <InputDialog
             isOpen={promptForInput || promptForSensitiveInput}
             onInput={onInput}
@@ -420,10 +453,10 @@ function App() {
             </symbol>
             <symbol id="x">
                 <line x1="3" y1="3" x2="22" y2="22"
-                      stroke-linecap="round"
+                      strokeLinecap="round"
                 />
                 <line x1="22" y1="3" x2="3" y2="22"
-                      stroke-linecap="round"
+                      strokeLinecap="round"
                 />
             </symbol>
         </svg>

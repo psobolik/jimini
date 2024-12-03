@@ -5,6 +5,7 @@ interface MenuProps {
     onShowAbout: () => void;
     onSave: () => void;
     onSettings: () => void;
+    onShowBookmarkPanel: () => void;
 }
 
 const HamburgerMenu: React.FunctionComponent<MenuProps> = (props) => {
@@ -52,6 +53,7 @@ const HamburgerMenu: React.FunctionComponent<MenuProps> = (props) => {
         {isMenuVisible && <div id={"menu"}>
             <a href="#" onClick={props.onSave}>Save as...</a>
             <a href="#" onClick={props.onSettings}>Settings</a>
+            <a href="#" onClick={props.onShowBookmarkPanel}>Bookmarks</a>
             <a href="#" onClick={props.onShowAbout}>About</a>
         </div>}
     </>

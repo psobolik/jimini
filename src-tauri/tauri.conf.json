@@ -20,7 +20,8 @@
         "scope": [
           "$CONFIG/**/*",
           "$APPCONFIG/**/*",
-          "$APPLOCALDATA/**/*"
+          "$APPLOCALDATA/**/*",
+          "$LOCALDATA/**/*"
         ],
         "readFile": true,
         "writeFile": true,

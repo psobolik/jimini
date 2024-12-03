@@ -1,0 +1,8 @@
+#bookmark-panel {
+    margin: 0.5rem;
+
+    & .info {
+        text-align: center;
+        color: var(--info-color);
+    }
+}
