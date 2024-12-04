@@ -5,7 +5,7 @@ interface ClosePanelProps {
 }
 const ClosePanel: React.FunctionComponent<ClosePanelProps> = (props) => {
     return <div className={"x-panel"}>
-        <button className="close-button" onClick={props.onClose}>{<svg viewBox="0 0 26 26">
+        <button className="close-button" title={"Close"} onClick={props.onClose}>{<svg viewBox="0 0 26 26">
             <use href="#x"/>
         </svg>}
         </button>

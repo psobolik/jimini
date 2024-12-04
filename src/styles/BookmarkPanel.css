@@ -1,8 +1,77 @@
+#wrapper.light-scheme {
+    --drag-target-background-color: #fff;
+    --drag-target-drop-color: #ac8f05
+}
+
+#wrapper.dark-scheme {
+    --drag-target-background-color: #000;
+    --drag-target-drop-color: #ffeb88
+}
+
 #bookmark-panel {
     margin: 0.5rem;
 
+    & button {
+        margin-bottom: 0.25em;
+    }
     & .info {
         text-align: center;
         color: var(--info-color);
+    }
+
+    & .bookmark-target-wrapper {
+        background-color: var(--drag-target-background-color);
+        margin: 0.25em;
+    }
+
+    & .drop-target-above {
+        margin-top: 1em;
+        border-top: solid thick var(--drag-target-drop-color);
+    }
+
+    & .drop-target-below {
+        margin-bottom: 1em;
+        border-bottom: solid thick var(--drag-target-drop-color);
+    }
+
+    & .link-panel {
+        margin: 0.25em;
+    }
+
+    & .bookmark-drop-target {
+        display: flex;
+
+        & .link {
+            padding-top: 0.3em;
+        }
+
+        & button {
+            outline: none;
+            border: none;
+            color: var(--input-color);
+            background-color: transparent;
+            box-shadow: none;
+        }
+
+        & svg {
+            stroke-width: 2;
+            fill: none;
+            stroke: var(--input-color);
+            width: 16px;
+            height: 16px;
+        }
+
+        & svg.drag-handle {
+            fill: var(--input-color);
+            stroke: none;
+            cursor: grab;
+        }
+    }
+    & .menu-item-overlay {
+        cursor: grabbing;
+        padding: 0.5rem 1rem;
+        inline-size: min-content;
+        background-color: var(--drag-target-background-color);
+        border-left: solid 1px var(--input-color);
     }
 }

@@ -22,7 +22,7 @@ import AboutDialog from "./dialogs/AboutDialog.tsx";
 import SettingsDialog from "./dialogs/SettingsDialog.tsx";
 import HamburgerMenu from "./components/HamburgerMenu.tsx";
 import BookmarkPanel from "./components/BookmarkPanel.tsx";
-import BookmarkLinksStore from "./Stores/BookmarkLinksStore.ts";
+import BookmarksStore from "./Stores/BookmarksStore.ts";
 import Bookmark from "./Data/Bookmark.ts";
 
 function App() {
@@ -184,6 +184,7 @@ function App() {
         }
     }
     const doRequest = () => {
+        setSuccess(undefined);
         setNoHistory(false);
         setUrlString(urlInputString);
     }
@@ -212,7 +213,6 @@ function App() {
                         .then(data => {
                             setInlineImageSrc(`data:${success.mimeType?.toString()};base64,${data}`);
                         })
-                    setSuccess(success);
                 }
             } else {
                 setInfo(`Can't display MIME type "${success.mimeType}"\n`)
@@ -320,12 +320,12 @@ function App() {
         return <div className="plain">{success.lines().map((line, index) => <div key={index}>{line}</div>)}</div>
     }
     const bookmark = () => {
-        BookmarkLinksStore.read().then(bookmarks => {
+        BookmarksStore.read().then(bookmarks => {
             const isBookmarked = bookmarks.find(value => value.url === urlString)
             if (!isBookmarked) {
                 setInfo("Added bookmark")
                 bookmarks.push(new Bookmark(urlString));
-                BookmarkLinksStore.write(bookmarks);
+                BookmarksStore.write(bookmarks);
             } else {
                 setInfo("Bookmarked")
             }
@@ -392,7 +392,7 @@ function App() {
                                onShowAbout={() => setShowAbout(true)}
                                onShowBookmarkPanel={() => setShowBookmarkPanel(true)}
                 />
-                <button id={"home-button"} className={"nav-button"} onClick={home}
+                <button id={"home-button"} className={"nav-button"} onClick={home} title={"Open home page"}
                         disabled={settings.homeUrlString.length === 0}>{<svg viewBox="0 0 26 26">
                     <polygon
                         points="13,3 25,14 20,14 20,22 15,22 15,17 11,17 11,22 6,22 6,14 1,14"
@@ -400,7 +400,7 @@ function App() {
                     />
                 </svg>}
                 </button>
-                <button id={"bookmark-button"} className={"nav-button"} onClick={bookmark}
+                <button id={"bookmark-button"} className={"nav-button"} onClick={bookmark} title={"Bookmark current page"}
                         disabled={false}>{<svg viewBox="0 0 26 26">
                     <polygon
                         points="19,24 13,16 7,24 7,3 19,3"
@@ -408,12 +408,12 @@ function App() {
                     />
                 </svg>}
                 </button>
-                <button id="previous-button" className="nav-button" onClick={previous}
+                <button id="previous-button" className="nav-button" onClick={previous} title={"Previous"}
                         disabled={!urlHistory.hasPreviousUrl()}>{<svg viewBox="0 0 26 26">
                     <use href="#triangle" transform="rotate(-90, 13, 13)"/>
                 </svg>}
                 </button>
-                <button id="next-button" className="nav-button" onClick={next} disabled={!urlHistory.hasNextUrl()}>{<svg
+                <button id="next-button" className="nav-button" onClick={next} title={"Next"} disabled={!urlHistory.hasNextUrl()}>{<svg
                     viewBox="0 0 26 26">
                     <use href="#triangle" transform="rotate(90, 13, 13)"/>
                 </svg>}</button>
