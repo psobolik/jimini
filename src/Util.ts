@@ -24,6 +24,9 @@ export default class Util {
             return ColorScheme.LIGHT
         }
     }
+    static removeTrailingSlash = (value: string): string => {
+        return value.endsWith("/") || value.endsWith("\\") ? value.substring(0, value.length - 1) : value;
+    }
 }
 // We should watch for changes in the preferred color scheme, using the following:
 // window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {

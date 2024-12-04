@@ -134,15 +134,18 @@ function App() {
     }
     const saveDocument = () => {
         const getSuggestedFileName = (urlString: string, success: Success) => {
+            // Remove trailing slash no matter what
+            const suggestedFilename = Util.removeTrailingSlash(urlString);
+            // Maybe add an appropriate extension
             if (success.isGemini()) {
                 const geminiExtension = ".gmi";
-                return urlString.endsWith(geminiExtension) ? urlString : `${urlString}${geminiExtension}`;
+                return suggestedFilename.endsWith(geminiExtension) ? suggestedFilename : `${suggestedFilename}${geminiExtension}`;
             }
             if (success.isText()) {
                 const textExtension = ".txt";
-                return urlString.endsWith(textExtension) ? urlString : `${urlString}${textExtension}`;
+                return suggestedFilename.endsWith(textExtension) ? suggestedFilename : `${suggestedFilename}${textExtension}`;
             }
-            return urlString;
+            return suggestedFilename;
         }
         if (success && success.body) {
             saveOctets(Util.toUrl(getSuggestedFileName(urlString, success)), success.body);
@@ -150,7 +153,7 @@ function App() {
     }
     const saveOctets = (url: URL, octets: number[]) => {
         const getSavePath = async (url: URL) => {
-            const suggestedFilename = url.toString();
+            const suggestedFilename = Util.removeTrailingSlash(url.toString());
             return await save({
                 defaultPath: `${await downloadDir()}/${suggestedFilename}`
             });
@@ -213,7 +216,7 @@ function App() {
                 }
             } else {
                 setInfo(`Can't display MIME type "${success.mimeType}"\n`)
-                saveOctets(url, success.body);
+                saveDocument();
             }
         } else if (result.redirect) {
             const redirect = new Redirect(result.redirect);
