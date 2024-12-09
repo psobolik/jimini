@@ -44,6 +44,7 @@ function App() {
     const [showAbout, setShowAbout] = React.useState<boolean>(false);
     const [showSettings, setShowSettings] = React.useState<boolean>(false);
     const [showBookmarkPanel, setShowBookmarkPanel] = React.useState<boolean>(false);
+    const [bookmarks, setBookmarks] = React.useState<Bookmark[]>(new Array<Bookmark>);
     const [settings, setSettings] = React.useState<Settings>(new Settings());
 
     React.useEffect(() => {
@@ -75,13 +76,28 @@ function App() {
         }
     }, [])
     React.useEffect(() => {
-        const writeSettings = async () => {
-            if (settings) await SettingsStore.write(settings);
-        }
         if (settings) {
-            writeSettings().catch(e => console.error(e))
+            SettingsStore.write(settings).catch(e => console.error(e))
         }
     }, [settings])
+    let needToLoadBookmarks = true;
+    React.useEffect(() => {
+        if (!needToLoadBookmarks) return;
+        BookmarksStore.read()
+            .then(value => {
+                needToLoadBookmarks = false;
+                setBookmarks(Bookmark.sortAndRenumber(value));
+            })
+        return () => {
+            needToLoadBookmarks = false;
+        }
+    }, [])
+    React.useEffect(() => {
+        if (bookmarks) {
+            BookmarksStore.write(bookmarks).catch(e => console.error(e));
+            needToLoadBookmarks = true;
+        }
+    }, [bookmarks])
     React.useEffect(() => {
         if (urlString) {
             // If there's no protocol, make it gemini
@@ -136,16 +152,8 @@ function App() {
         const getSuggestedFileName = (urlString: string, success: Success) => {
             // Remove trailing slash no matter what
             const suggestedFilename = Util.removeTrailingSlash(urlString);
-            // Maybe add an appropriate extension
-            if (success.isGemini()) {
-                const geminiExtension = ".gmi";
-                return suggestedFilename.endsWith(geminiExtension) ? suggestedFilename : `${suggestedFilename}${geminiExtension}`;
-            }
-            if (success.isText()) {
-                const textExtension = ".txt";
-                return suggestedFilename.endsWith(textExtension) ? suggestedFilename : `${suggestedFilename}${textExtension}`;
-            }
-            return suggestedFilename;
+            const suggestedExtension = success.isGemini() ? ".gmi" : success.isText() ? ".txt" : "";
+            return suggestedExtension ? suggestedFilename.endsWith(suggestedExtension) ? suggestedFilename : `${suggestedFilename}${suggestedExtension}` : suggestedFilename;
         }
         if (success && success.body) {
             saveOctets(Util.toUrl(getSuggestedFileName(urlString, success)), success.body);
@@ -319,18 +327,19 @@ function App() {
     const formatPlainSuccess = (success: Success) => {
         return <div className="plain">{success.lines().map((line, index) => <div key={index}>{line}</div>)}</div>
     }
-    const bookmark = () => {
-        BookmarksStore.read().then(bookmarks => {
-            const isBookmarked = bookmarks.find(value => value.url === urlString)
-            if (!isBookmarked) {
-                setInfo("Added bookmark")
-                bookmarks.push(new Bookmark(urlString));
-                BookmarksStore.write(bookmarks);
-            } else {
-                setInfo("Bookmarked")
-            }
-            setTimeout(() => setInfo(""), 1500);
-        })
+    const addBookmark = () => {
+        const isBookmarked = bookmarks.find(value => value.url === urlString)
+        if (!isBookmarked) {
+            setInfo("Added bookmark")
+            bookmarks.push(new Bookmark(urlString));
+            setBookmarks(bookmarks.slice());
+        } else {
+            setInfo("Bookmarked")
+        }
+        setTimeout(() => setInfo(""), 1500);
+    }
+    const removeBookmark = (bookmark: Bookmark) => {
+        setBookmarks(bookmarks.filter(value => value.url != bookmark.url));
     }
     const home = () => {
         if (settings.homeUrlString === urlString) return;
@@ -385,54 +394,61 @@ function App() {
         const class2 = fontSizeClass();
         return class2 ? `${class1} ${class2}` : class1;
     }
-    return (<div id={"wrapper"} className={wrapperClass()}>
-        {showBookmarkPanel ? <BookmarkPanel openUrl={onOpenUrl} cancel={() => setShowBookmarkPanel(false)}/> : <>
-            <header>
-                <HamburgerMenu onSave={saveDocument} onSettings={() => setShowSettings(true)}
-                               onShowAbout={() => setShowAbout(true)}
-                               onShowBookmarkPanel={() => setShowBookmarkPanel(true)}
-                />
-                <button id={"home-button"} className={"nav-button"} onClick={home} title={"Open home page"}
-                        disabled={settings.homeUrlString.length === 0}>{<svg viewBox="0 0 26 26">
-                    <polygon
-                        points="13,3 25,14 20,14 20,22 15,22 15,17 11,17 11,22 6,22 6,14 1,14"
-                        strokeLinejoin="round"
+    const isCurrentUrlBookmarked = () => {
+        return bookmarks.find(bookmark => bookmark.url == urlString) != undefined;
+    }
+    return <div id={"wrapper"} className={wrapperClass()}>
+        {showBookmarkPanel ?
+            <BookmarkPanel bookmarks={bookmarks} setBookmarks={setBookmarks} removeBookmark={removeBookmark}
+                           openUrl={onOpenUrl} cancel={() => setShowBookmarkPanel(false)}/> : <>
+                <header>
+                    <HamburgerMenu onSave={saveDocument} onSettings={() => setShowSettings(true)}
+                                   onShowAbout={() => setShowAbout(true)}
+                                   onShowBookmarkPanel={() => setShowBookmarkPanel(true)}
                     />
-                </svg>}
-                </button>
-                <button id={"bookmark-button"} className={"nav-button"} onClick={bookmark} title={"Bookmark current page"}
-                        disabled={false}>{<svg viewBox="0 0 26 26">
-                    <polygon
-                        points="19,24 13,16 7,24 7,3 19,3"
-                        strokeLinejoin="round"
+                    <button id={"home-button"} className={"nav-button"} onClick={home} title={"Open home page"}
+                            disabled={settings.homeUrlString.length === 0}>{<svg viewBox="0 0 26 26">
+                        <polygon
+                            points="13,3 25,14 20,14 20,22 15,22 15,17 11,17 11,22 6,22 6,14 1,14"
+                            strokeLinejoin="round"
+                        />
+                    </svg>}
+                    </button>
+                    <button id={"bookmark-button"} className={"nav-button"} onClick={addBookmark}
+                            title={"Bookmark current page"}
+                            disabled={isCurrentUrlBookmarked()}>{<svg viewBox="0 0 26 26">
+                        <polygon
+                            points="19,24 13,16 7,24 7,3 19,3"
+                            strokeLinejoin="round"
+                        />
+                    </svg>}
+                    </button>
+                    <button id="previous-button" className="nav-button" onClick={previous} title={"Previous"}
+                            disabled={!urlHistory.hasPreviousUrl()}>{<svg viewBox="0 0 26 26">
+                        <use href="#triangle" transform="rotate(-90, 13, 13)"/>
+                    </svg>}
+                    </button>
+                    <button id="next-button" className="nav-button" onClick={next} title={"Next"}
+                            disabled={!urlHistory.hasNextUrl()}>{<svg
+                        viewBox="0 0 26 26">
+                        <use href="#triangle" transform="rotate(90, 13, 13)"/>
+                    </svg>}</button>
+                    <input type="text" placeholder="Gemini URL" id="gemini-url-input"
+                           value={urlInputString}
+                           onChange={e => setUrlInputString(e.target.value)}
+                           onKeyUp={onUrlKeyUp}
                     />
-                </svg>}
-                </button>
-                <button id="previous-button" className="nav-button" onClick={previous} title={"Previous"}
-                        disabled={!urlHistory.hasPreviousUrl()}>{<svg viewBox="0 0 26 26">
-                    <use href="#triangle" transform="rotate(-90, 13, 13)"/>
-                </svg>}
-                </button>
-                <button id="next-button" className="nav-button" onClick={next} title={"Next"} disabled={!urlHistory.hasNextUrl()}>{<svg
-                    viewBox="0 0 26 26">
-                    <use href="#triangle" transform="rotate(90, 13, 13)"/>
-                </svg>}</button>
-                <input type="text" placeholder="Gemini URL" id="gemini-url-input"
-                       value={urlInputString}
-                       onChange={e => setUrlInputString(e.target.value)}
-                       onKeyUp={onUrlKeyUp}
-                />
-                <button onClick={doRequest} disabled={urlInputString.length === 0}>Go</button>
-            </header>
-            <div className="container">
-                {loading && <div className="loading">Loading...</div>}
-                {info && <p id={"info"}>{info}</p>}
-                {geminiError && <p id="gemini_error">{geminiError}</p>}
-                {success && formatSuccess(success)}
-                {inlineImageSrc && <img alt={urlString} src={inlineImageSrc}/>}
-            </div>
-            <footer>{footer}</footer>
-        </>}
+                    <button onClick={doRequest} disabled={urlInputString.length === 0}>Go</button>
+                </header>
+                <div className="container">
+                    {loading && <div className="loading">Loading...</div>}
+                    {info && <p id={"info"}>{info}</p>}
+                    {geminiError && <p id="gemini_error">{geminiError}</p>}
+                    {success && formatSuccess(success)}
+                    {inlineImageSrc && <img alt={urlString} src={inlineImageSrc}/>}
+                </div>
+                <footer>{footer}</footer>
+            </>}
         <InputDialog
             isOpen={promptForInput || promptForSensitiveInput}
             onInput={onInput}
@@ -463,7 +479,7 @@ function App() {
                 />
             </symbol>
         </svg>
-    </div>);
+    </div>;
 }
 
 export default App;

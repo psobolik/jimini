@@ -17,7 +17,8 @@
   background-color: var(--background-color);
 
   & pre {
-    overflow: clip;
+    overflow: scroll;
+    padding: 1rem 0;
     line-height: 1em;
   }
 }

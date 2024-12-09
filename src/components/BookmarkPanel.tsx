@@ -2,17 +2,10 @@ import "../styles/BookmarkPanel.css"
 
 import React, {useState} from "react";
 import Bookmark from "../Data/Bookmark.ts";
-import BookmarksStore from "../Stores/BookmarksStore.ts";
 import BookmarkLink from "./BookmarkLink.tsx";
 import ClosePanel from "./ClosePanel.tsx";
 import {
-    DndContext,
-    DragEndEvent,
-    DragMoveEvent,
-    DragOverEvent,
-    DragOverlay,
-    DragStartEvent,
-    pointerWithin
+    DndContext, DragEndEvent, DragMoveEvent, DragOverEvent, DragOverlay, DragStartEvent, pointerWithin
 } from "@dnd-kit/core";
 import {DragHandle} from "./DragHandle.tsx";
 import {DropTarget} from "./DropTarget.tsx";
@@ -20,40 +13,14 @@ import {DropTarget} from "./DropTarget.tsx";
 interface BookmarkPanelProps {
     cancel: () => void;
     openUrl: (url: string) => void;
+    removeBookmark: (bookmark: Bookmark) => void;
+    setBookmarks: (bookmarks: Bookmark[]) => void;
+    bookmarks: Bookmark[];
 }
 
 const BookmarkPanel: React.FunctionComponent<BookmarkPanelProps> = (props) => {
-    const [bookmarks, setBookmarks] = useState<Bookmark[]>(new Array<Bookmark>);
     const [editMode, setEditMode] = useState<boolean>(false);
     const [draggedBookmark, setDraggedBookmark] = useState<Bookmark | null>(null)
-
-    let bookmarks_loaded = false;
-    React.useEffect(() => {
-        const readBookmarks = async () => {
-            if (bookmarks_loaded) return;
-            BookmarksStore.read()
-                .then(value => {
-                    setBookmarks(Bookmark.sortAndRenumber(value));
-                })
-        }
-        readBookmarks().catch(e => console.error(e));
-        return () => {
-            bookmarks_loaded = true;
-        }
-    }, [])
-    React.useEffect(() => {
-        const writeBookmarks = async () => {
-            if (bookmarks) await BookmarksStore.write(bookmarks);
-        }
-        if (bookmarks) {
-            writeBookmarks().catch(e => console.error(e));
-            bookmarks_loaded = false;
-        }
-    }, [bookmarks])
-
-    const remove = (bookmark: Bookmark) => {
-        setBookmarks(bookmarks.filter(value => value !== bookmark));
-    }
 
     const clearDropTarget = () => {
         const removeClassName = (className: string) => {
@@ -82,7 +49,7 @@ const BookmarkPanel: React.FunctionComponent<BookmarkPanelProps> = (props) => {
         return {dragged: active, target: over, above: above}
     }
 
-    const onDragStart = (event: DragStartEvent)=> {
+    const onDragStart = (event: DragStartEvent) => {
         const {current} = event.active.data;
         setDraggedBookmark(current as Bookmark);
     }
@@ -92,11 +59,11 @@ const BookmarkPanel: React.FunctionComponent<BookmarkPanelProps> = (props) => {
         if (!details) return;
 
         const n = details.above ? details.target.sequence - 1 : details.target.sequence;
-        const renumbered = bookmarks.map(bookmark => {
+        const renumbered = props.bookmarks.map(bookmark => {
             if (bookmark.sequence === details.dragged.sequence) return new Bookmark(bookmark.url, details.target.sequence)
             return new Bookmark(bookmark.url, bookmark.sequence > n ? bookmark.sequence + 1 : bookmark.sequence - 1)
         });
-        setBookmarks(Bookmark.sortAndRenumber(renumbered));
+        props.setBookmarks(Bookmark.sortAndRenumber(renumbered));
     }
     const onDragOver = (event: DragOverEvent) => {
         const details = startDragHandler(event);
@@ -108,38 +75,41 @@ const BookmarkPanel: React.FunctionComponent<BookmarkPanelProps> = (props) => {
         if (link) link.classList.add(details.above ? "drop-target-above" : "drop-target-below");
     }
     const selectBookmarkPanel = () => {
-        const anyBookmarks = bookmarks.length > 0;
         return <div id="bookmark-panel">
             <ClosePanel onClose={props.cancel}/>
-            {anyBookmarks && <button onClick={() => {
-                setEditMode(true)
-            }}>Edit</button>}
-            {anyBookmarks ? bookmarks.map((bookmark, index) => {
-                return <ul key={index} className={"link-panel"}>
-                    <li><BookmarkLink bookmark={bookmark} className={"link"}
-                                      onClick={props.openUrl}/></li>
+            {props.bookmarks.length > 0 ? <>
+                <button onClick={() => {
+                    setEditMode(true)
+                }}>Edit
+                </button>
+                <ul className={"link-panel"}>
+                    {props.bookmarks.map((bookmark, index) => {
+                        return <li key={index}><BookmarkLink bookmark={bookmark} className={"link"}
+                                                             onClick={props.openUrl}/></li>
+                    })}
                 </ul>
-            }) : <div className={"info"}>No bookmarks</div>}
+            </> : <div className={"info"}>No bookmarks</div>}
         </div>
     }
     const editBookmarksPanel = () => {
         return <div id="bookmark-panel">
+            <div className={"x-panel"} style={{marginBottom: "0.5em"}}>&ensp;</div>
             <button onClick={() => {
                 setEditMode(false)
-            }}>Quit edit
+            }}>Done
             </button>
-            {bookmarks.length ?
+            {props.bookmarks.length ?
                 <DndContext collisionDetection={pointerWithin} onDragStart={onDragStart} onDragEnd={onDragEnd}
                             onDragOver={onDragOver}>
                     <div>
-                        {bookmarks.map((bookmark, index) => {
+                        {props.bookmarks.map((bookmark, index) => {
                             return <div key={index} data-sequence={bookmark.sequence}
                                         className={"bookmark-target-wrapper"}>
                                 <DropTarget bookmark={bookmark} className={"bookmark-drop-target"}>
                                     <DragHandle bookmark={bookmark}/>
                                     <span className={"link"}>{bookmark.url}</span>
                                     <button id={"delete-button"} style={{marginLeft: "auto"}} title={"Delete"}
-                                            onClick={() => remove(bookmark)}>{<svg
+                                            onClick={() => props.removeBookmark(bookmark)}>{<svg
                                         viewBox="0 0 26 26">
                                         <use href={"#trash"}/>
                                     </svg>}
