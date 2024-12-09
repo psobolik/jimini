@@ -188,13 +188,8 @@ function App() {
     const onUrlKeyUp = async (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === "Enter" && urlInputString.length !== 0) {
             event.preventDefault();
-            doRequest();
+            openInputUrl();
         }
-    }
-    const doRequest = () => {
-        setSuccess(undefined);
-        setNoHistory(false);
-        setUrlString(urlInputString);
     }
     const setResult = (result: GeminiResponse, url: URL) => {
         if (result.prompt) {
@@ -247,10 +242,7 @@ function App() {
 
     function onLinkClick(target: HTMLElement) {
         let link = target.dataset.link;
-        if (link) {
-            setNoHistory(false);
-            setUrlString(new URL(link, urlInputString).toString());
-        }
+        if (link) openUrl(new URL(link, urlInputString).toString(), false);
     }
 
     const onLinkHover = (target: HTMLElement, show: boolean) => {
@@ -327,37 +319,37 @@ function App() {
     const formatPlainSuccess = (success: Success) => {
         return <div className="plain">{success.lines().map((line, index) => <div key={index}>{line}</div>)}</div>
     }
+    const updateBookmarks = (bookmarks: Bookmark[]) => setBookmarks(Bookmark.sortAndRenumber(bookmarks));
     const addBookmark = () => {
-        const isBookmarked = bookmarks.find(value => value.url === urlString)
-        if (!isBookmarked) {
+        if (!bookmarks.find(value => value.url === urlString)) {
             setInfo("Added bookmark")
             bookmarks.push(new Bookmark(urlString));
-            setBookmarks(bookmarks.slice());
+            updateBookmarks(bookmarks);
         } else {
             setInfo("Bookmarked")
         }
         setTimeout(() => setInfo(""), 1500);
     }
-    const removeBookmark = (bookmark: Bookmark) => {
-        setBookmarks(bookmarks.filter(value => value.url != bookmark.url));
+    const removeBookmark = (bookmark: Bookmark) => updateBookmarks(bookmarks.filter(value => value.url != bookmark.url))
+    const openUrl = (url: string, withNoHistory: boolean = false) => {
+        if (urlString === url) return;
+        setSuccess(undefined);
+        setNoHistory(withNoHistory);
+        setUrlString(url);
     }
-    const home = () => {
-        if (settings.homeUrlString === urlString) return;
-        setUrlString(settings.homeUrlString)
+    const openInputUrl = () => openUrl(urlInputString);
+    const home = () =>  openUrl(settings.homeUrlString)
+    const openBookmarkUrl = (url: string) => {
+        setShowBookmarkPanel(false);
+        openUrl(url);
     }
     const previous = () => {
         let previousUrl = urlHistory.previousUrl();
-        if (previousUrl) {
-            setNoHistory(true);
-            setUrlString(previousUrl.toString());
-        }
+        if (previousUrl) openUrl(previousUrl.toString(), true);
     }
     const next = () => {
         let nextUrl = urlHistory.nextUrl();
-        if (nextUrl) {
-            setNoHistory(true);
-            setUrlString(nextUrl.toString());
-        }
+        if (nextUrl) openUrl(nextUrl.toString(), true);
     }
     const closeInputDialog = () => {
         setPromptForInput(false);
@@ -375,10 +367,6 @@ function App() {
     const onInputCancel = () => {
         finishInput();
         setUrlString(urlHistory.currentUrl()?.toString() ?? "");
-    }
-    const onOpenUrl = (url: string) => {
-        setUrlString(url);
-        setShowBookmarkPanel(false);
     }
     const colorSchemeClass = () => {
         const colorScheme = settings.colorScheme == ColorScheme.SYSTEM ? Util.preferredColorScheme() : settings.colorScheme;
@@ -399,8 +387,8 @@ function App() {
     }
     return <div id={"wrapper"} className={wrapperClass()}>
         {showBookmarkPanel ?
-            <BookmarkPanel bookmarks={bookmarks} setBookmarks={setBookmarks} removeBookmark={removeBookmark}
-                           openUrl={onOpenUrl} cancel={() => setShowBookmarkPanel(false)}/> : <>
+            <BookmarkPanel bookmarks={bookmarks} updateBookmarks={updateBookmarks} removeBookmark={removeBookmark}
+                           openUrl={openBookmarkUrl} cancel={() => setShowBookmarkPanel(false)}/> : <>
                 <header>
                     <HamburgerMenu onSave={saveDocument} onSettings={() => setShowSettings(true)}
                                    onShowAbout={() => setShowAbout(true)}
@@ -438,7 +426,7 @@ function App() {
                            onChange={e => setUrlInputString(e.target.value)}
                            onKeyUp={onUrlKeyUp}
                     />
-                    <button onClick={doRequest} disabled={urlInputString.length === 0}>Go</button>
+                    <button onClick={openInputUrl} disabled={urlInputString.length === 0}>Go</button>
                 </header>
                 <div className="container">
                     {loading && <div className="loading">Loading...</div>}

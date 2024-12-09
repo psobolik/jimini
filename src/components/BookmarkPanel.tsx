@@ -14,7 +14,7 @@ interface BookmarkPanelProps {
     cancel: () => void;
     openUrl: (url: string) => void;
     removeBookmark: (bookmark: Bookmark) => void;
-    setBookmarks: (bookmarks: Bookmark[]) => void;
+    updateBookmarks: (bookmarks: Bookmark[]) => void;
     bookmarks: Bookmark[];
 }
 
@@ -63,7 +63,7 @@ const BookmarkPanel: React.FunctionComponent<BookmarkPanelProps> = (props) => {
             if (bookmark.sequence === details.dragged.sequence) return new Bookmark(bookmark.url, details.target.sequence)
             return new Bookmark(bookmark.url, bookmark.sequence > n ? bookmark.sequence + 1 : bookmark.sequence - 1)
         });
-        props.setBookmarks(Bookmark.sortAndRenumber(renumbered));
+        props.updateBookmarks(renumbered);
     }
     const onDragOver = (event: DragOverEvent) => {
         const details = startDragHandler(event);
