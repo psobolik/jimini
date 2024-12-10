@@ -1,22 +1,18 @@
 import {useDroppable} from '@dnd-kit/core';
-import Bookmark from "../Data/Bookmark.ts";
 import React from "react";
 
 interface DropTargetProps {
-    bookmark: Bookmark;
-    children: React.ReactNode;
+    index: number;
     className: string;
 }
 
 export const DropTarget: React.FunctionComponent<DropTargetProps> = (props: DropTargetProps) => {
     const {setNodeRef} = useDroppable({
-        id: `drop-target${props.bookmark.sequence}`,
-        data: props.bookmark,
+        id: `drop-target${props.index}`,
+        data: {index: props.index},
     });
 
     return (
-        <span ref={setNodeRef} className={props.className}>
-            {props.children}
-        </span>
+        <div className={props.className} data-index={props.index} ref={setNodeRef}></div>
     );
 }

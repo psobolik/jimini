@@ -1,11 +1,11 @@
 #wrapper.light-scheme {
     --drag-target-background-color: #fff;
-    --drag-target-drop-color: #ac8f05
+    --drop-target-background-color: #ccc;
 }
 
 #wrapper.dark-scheme {
     --drag-target-background-color: #000;
-    --drag-target-drop-color: #ffeb88
+    --drop-target-background-color: #444;
 }
 
 #bookmark-panel {
@@ -22,23 +22,6 @@
     & .bookmark-target-wrapper {
         background-color: var(--drag-target-background-color);
         margin: 0.25em;
-    }
-
-    & .drop-target-above {
-        margin-top: 1em;
-        border-top: solid thick var(--drag-target-drop-color);
-    }
-
-    & .drop-target-below {
-        margin-bottom: 1em;
-        border-bottom: solid thick var(--drag-target-drop-color);
-    }
-
-    & .link-panel {
-        margin: 0.25em;
-    }
-
-    & .bookmark-drop-target {
         display: flex;
 
         & .link {
@@ -67,6 +50,21 @@
             cursor: grab;
         }
     }
+
+    & .drop-target-over {
+        background-color: var(--drop-target-background-color);
+        padding: 0.5em;
+    }
+
+    & .bookmark-drop-target {
+        margin: 0 0.25em;
+        min-height: 0.25em;
+    }
+
+    & .link-panel {
+        margin: 0.25em;
+    }
+
     & .menu-item-overlay {
         cursor: grabbing;
         padding: 0.5rem 1rem;

@@ -1,13 +1,7 @@
 import Bookmark from "../Data/Bookmark.ts";
 import React, {useState} from "react";
 import {
-    DndContext,
-    DragEndEvent,
-    DragMoveEvent,
-    DragOverEvent,
-    DragOverlay,
-    DragStartEvent,
-    pointerWithin
+    DndContext, DragEndEvent, DragMoveEvent, DragOverEvent, DragOverlay, DragStartEvent
 } from "@dnd-kit/core";
 import {DropTarget} from "./DropTarget.tsx";
 import {DragHandle} from "./DragHandle.tsx";
@@ -21,33 +15,31 @@ interface BookmarkEditPanelProps {
 }
 
 const BookmarkEditPanel: React.FunctionComponent<BookmarkEditPanelProps> = (props) => {
+    const dropTargetClassName = "bookmark-drop-target";
+    const dropTargetOverClassName = "drop-target-over";
+
     const [draggedBookmark, setDraggedBookmark] = useState<Bookmark | null>(null)
 
-    const clearDropTarget = () => {
-        const removeClassName = (className: string) => {
-            const allItems = document.querySelectorAll(`.${className}`);
-            [...allItems].forEach(item => item.classList.remove(className));
-        }
-        removeClassName("drop-target-above");
-        removeClassName("drop-target-below");
+    const removeClassName = (className: string) => {
+        const allItems = document.querySelectorAll(`.${className}`);
+        [...allItems].forEach(item => item.classList.remove(className));
     }
     const startDragHandler = (event: DragMoveEvent): {
-        dragged: Bookmark, target: Bookmark, above: boolean
+        dragged: Bookmark, target: number
     } | undefined => {
-        clearDropTarget();
+        removeClassName(dropTargetOverClassName);
 
         if (!event.over || !event.over.data.current) return;
         if (!event.active || !event.active.data.current) return;
 
-        const over = event.over.data.current as Bookmark;
+        const over = event.over.data.current as { index: number };
         const active = event.active.data.current as Bookmark;
 
-        const above = (event.activatorEvent as PointerEvent).altKey
-        const delta = active.sequence - over.sequence;
-        // Can't drop a link on itself, below the link above it or above the link below it
-        if (delta === 0 || (delta === -1 && above) || (delta === 1 && !above)) return;
+        // Can't drop bookmark into slot above or below itself
+        const delta = over.index - active.sequence;
+        if (delta === -1 || delta === 0) return;
 
-        return {dragged: active, target: over, above: above}
+        return {dragged: active, target: over.index}
     }
     const onDragStart = (event: DragStartEvent) => {
         const {current} = event.active.data;
@@ -58,10 +50,9 @@ const BookmarkEditPanel: React.FunctionComponent<BookmarkEditPanelProps> = (prop
         const details = startDragHandler(event);
         if (!details) return;
 
-        const n = details.above ? details.target.sequence - 1 : details.target.sequence;
         const renumbered = props.bookmarks.map(bookmark => {
-            if (bookmark.sequence === details.dragged.sequence) return new Bookmark(bookmark.url, details.target.sequence)
-            return new Bookmark(bookmark.url, bookmark.sequence > n ? bookmark.sequence + 1 : bookmark.sequence - 1)
+            if (bookmark.sequence === details.dragged.sequence) return new Bookmark(bookmark.url, details.target)
+            return new Bookmark(bookmark.url, bookmark.sequence > details.target ? bookmark.sequence + 1 : bookmark.sequence - 1)
         });
         props.updateBookmarks(renumbered);
     }
@@ -69,10 +60,10 @@ const BookmarkEditPanel: React.FunctionComponent<BookmarkEditPanelProps> = (prop
         const details = startDragHandler(event);
         if (!details) return;
 
-        // Find the element we're over
-        const link = document.querySelector(`div.bookmark-target-wrapper[data-sequence="${details.target.sequence}"]`)
+        // Find the element we're over, i.e. the drop target with the specific index
+        const dropTarget = document.querySelector(`.${dropTargetClassName}[data-index="${details.target}"]`)
         // Style the target element
-        if (link) link.classList.add(details.above ? "drop-target-above" : "drop-target-below");
+        if (dropTarget) dropTarget.classList.add(dropTargetOverClassName);
     }
 
     return <div id="bookmark-panel">
@@ -82,13 +73,13 @@ const BookmarkEditPanel: React.FunctionComponent<BookmarkEditPanelProps> = (prop
         }}>Done
         </button>
         {props.bookmarks.length ?
-            <DndContext collisionDetection={pointerWithin} onDragStart={onDragStart} onDragEnd={onDragEnd}
+            <DndContext onDragStart={onDragStart} onDragEnd={onDragEnd}
                         onDragOver={onDragOver}>
-                <div>
+                <>
+                    <DropTarget className={dropTargetClassName} index={-1}/>
                     {props.bookmarks.map((bookmark, index) => {
-                        return <div key={index} data-sequence={bookmark.sequence}
-                                    className={"bookmark-target-wrapper"}>
-                            <DropTarget bookmark={bookmark} className={"bookmark-drop-target"}>
+                        return <span key={index}>
+                            <div data-sequence={bookmark.sequence} className={"bookmark-target-wrapper"}>
                                 <DragHandle bookmark={bookmark}/>
                                 <span className={"link"}>{bookmark.url}</span>
                                 <button id={"delete-button"} style={{marginLeft: "auto"}} title={"Delete"}
@@ -97,13 +88,14 @@ const BookmarkEditPanel: React.FunctionComponent<BookmarkEditPanelProps> = (prop
                                     <use href={"#trash"}/>
                                 </svg>}
                                 </button>
-                            </DropTarget>
-                        </div>
+                            </div>
+                            <DropTarget className={dropTargetClassName} index={index}/>
+                        </span>
                     })}
-                </div>
-                {draggedBookmark && <DragOverlay>
-                    <div className={"menu-item-overlay"}>{draggedBookmark.url}</div>
-                </DragOverlay>}
+                </>
+                <DragOverlay dropAnimation={null}>
+                    <div className={"menu-item-overlay"}>{draggedBookmark?.url}</div>
+                </DragOverlay>
             </DndContext> : <div className={"info"}>No bookmarks</div>}
         <svg className="symbol-set">
             <symbol id="trash">
