@@ -333,7 +333,6 @@ function App() {
     const removeBookmark = (bookmark: Bookmark) => updateBookmarks(bookmarks.filter(value => value.url != bookmark.url))
     const openUrl = (url: string, withNoHistory: boolean = false) => {
         if (urlString === url) return;
-        setSuccess(undefined);
         setNoHistory(withNoHistory);
         setUrlString(url);
     }
