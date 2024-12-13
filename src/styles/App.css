@@ -19,7 +19,6 @@
   & pre {
     overflow: scroll;
     padding: 1rem 0;
-    line-height: 1em;
   }
 }
 #wrapper.smaller-text {
