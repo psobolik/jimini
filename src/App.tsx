@@ -259,6 +259,11 @@ function App() {
         return <></>
     }
     const formatGeminiSuccess = (success: Success) => {
+        const stripAnsiSequences = (line: string): string => {
+            // Ought not be in there anyway...
+            const re = /\x1b\[[\x20-\x3f]*[\x40-\x7e]*/g;
+            return line.replaceAll(re, "");
+        }
         let preformattedChildren: React.ReactNode[] = [];
         let preformat = false;
         const lines: React.ReactNode[] = [];
@@ -272,7 +277,7 @@ function App() {
                 }
                 preformat = !preformat;
             } else if (preformat) {
-                preformattedChildren.push(<span key={index}>{line}<br/></span>);
+                preformattedChildren.push(<span key={index}>{stripAnsiSequences(line)}<br/></span>);
             } else switch (geminiLine.type) {
                 case LineType.Link:
                     const jimini_link = JiminiLink.parseString(geminiLine.text ?? "");
