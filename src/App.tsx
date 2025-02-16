@@ -51,51 +51,36 @@ function App() {
         window.addEventListener("keyup", onKeyUp);
         return () => window.removeEventListener("keyup", onKeyUp);
     }, [])
-    let is_setup = false;
     React.useEffect(() => {
-        const readSettings = async () => {
-            if (is_setup) return;
-            SettingsStore.read()
-                .then(value => {
-                    setSettings(value);
-                    getMatches().then((matches) => {
-                        // If there's a URL on the command line, open it
-                        if (matches.args.url.value) {
-                            setUrlString(matches.args.url.value.toString());
-                        }
-                        // Else, if there's a home URL in the settings, open it
-                        else if (value.homeUrlString) {
-                            setUrlString(value.homeUrlString)
-                        }
-                    })
+        SettingsStore.read()
+            .then(value => {
+                setSettings(value);
+                getMatches().then((matches) => {
+                    // If there's a URL on the command line, open it
+                    if (matches.args.url.value) {
+                        setUrlString(matches.args.url.value.toString());
+                    }
+                    // Else, if there's a home URL in the settings, open it
+                    else if (value.homeUrlString) {
+                        setUrlString(value.homeUrlString)
+                    }
                 })
-        }
-        readSettings().catch(e => console.error(e));
-        return () => {
-            is_setup = true;
-        }
+            }).catch(e => console.error(e));
     }, [])
     React.useEffect(() => {
         if (settings) {
             SettingsStore.write(settings).catch(e => console.error(e))
         }
     }, [settings])
-    let needToLoadBookmarks = true;
     React.useEffect(() => {
-        if (!needToLoadBookmarks) return;
         BookmarksStore.read()
             .then(value => {
-                needToLoadBookmarks = false;
                 setBookmarks(Bookmark.sortAndRenumber(value));
             })
-        return () => {
-            needToLoadBookmarks = false;
-        }
     }, [])
     React.useEffect(() => {
         if (bookmarks) {
             BookmarksStore.write(bookmarks).catch(e => console.error(e));
-            needToLoadBookmarks = true;
         }
     }, [bookmarks])
     React.useEffect(() => {
@@ -245,20 +230,21 @@ function App() {
         if (link) openUrl(new URL(link, urlInputString).toString(), false);
     }
 
-    const onLinkHover = (target: HTMLElement, show: boolean) => {
-        if (show) {
-            let link = target.dataset.link;
-            if (link) {
-                setFooter(new URL(link, urlInputString).toString());
-            }
-        } else setFooter("");
-    }
     const formatSuccess = (success: Success) => {
         if (success.isGemini()) return formatGeminiSuccess(success);
         if (success.isTextLike()) return formatPlainSuccess(success);
         return <></>
     }
     const formatGeminiSuccess = (success: Success) => {
+        const showLink = (target: HTMLElement)=> {
+            let link = target.dataset.link;
+            if (link) {
+                setFooter(new URL(link, urlInputString).toString());
+            }
+        }
+        const hideLink = () => {
+            setFooter("")
+        }
         const stripAnsiSequences = (line: string): string => {
             // Ought not be in there anyway...
             const re = /\x1b\[[\x20-\x3f]*[\x40-\x7e]*/g;
@@ -287,10 +273,10 @@ function App() {
                         if (link.protocol !== "gemini:") className += " foreign-link";
                         lines.push(<div key={index}>
                             <a href={"#"} className={className} data-link={jimini_link.link}
-                               onFocus={e => onLinkHover(e.target as HTMLElement, true)}
-                               onBlur={e => onLinkHover(e.target as HTMLElement, false)}
-                               onMouseEnter={e => onLinkHover(e.target as HTMLElement, true)}
-                               onMouseLeave={e => onLinkHover(e.target as HTMLElement, false)}
+                               onFocus={e => showLink(e.target as HTMLElement)}
+                               onBlur={hideLink}
+                               onMouseEnter={e => showLink(e.target as HTMLElement)}
+                               onMouseLeave={hideLink}
                                onClick={e => onLinkClick(e.target as HTMLElement)}>
                                 {jimini_link.name}
                             </a>
@@ -342,7 +328,7 @@ function App() {
         setUrlString(url);
     }
     const openInputUrl = () => openUrl(urlInputString);
-    const home = () =>  openUrl(settings.homeUrlString)
+    const home = () => openUrl(settings.homeUrlString)
     const openBookmarkUrl = (url: string) => {
         setShowBookmarkPanel(false);
         openUrl(url);
@@ -372,19 +358,19 @@ function App() {
         finishInput();
         setUrlString(urlHistory.currentUrl()?.toString() ?? "");
     }
-    const colorSchemeClass = () => {
-        const colorScheme = settings.colorScheme == ColorScheme.SYSTEM ? Util.preferredColorScheme() : settings.colorScheme;
-        return colorScheme == ColorScheme.DARK ? "dark-scheme" : "light-scheme"
-    }
-    const fontSizeClass = () => {
-        if (settings.textSize == TextSize.SMALL) return "smaller-text";
-        if (settings.textSize == TextSize.LARGE) return "larger-text";
-        return "";
-    }
     const wrapperClass = () => {
-        const class1 = colorSchemeClass();
-        const class2 = fontSizeClass();
-        return class2 ? `${class1} ${class2}` : class1;
+        const colorSchemeClass = () => {
+            const colorScheme = settings.colorScheme == ColorScheme.SYSTEM ? Util.preferredColorScheme() : settings.colorScheme;
+            return colorScheme == ColorScheme.DARK ? "dark-scheme" : "light-scheme"
+        }
+        const fontSizeClass = () => {
+            if (settings.textSize == TextSize.SMALL) return "smaller-text";
+            if (settings.textSize == TextSize.LARGE) return "larger-text";
+            return "";
+        }
+        const colorScheme = colorSchemeClass();
+        const fontSize = fontSizeClass();
+        return fontSize ? `${colorScheme} ${fontSize}` : colorScheme;
     }
     const isCurrentUrlBookmarked = () => {
         return bookmarks.find(bookmark => bookmark.url == urlString) != undefined;
