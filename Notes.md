@@ -46,6 +46,9 @@ On macOS, the executable is `./src-tauri/target/release/bundle/macos/Jimini.app`
 * `./package.json`
 
 # Files
-- Settings: ~/.config/psobolik.jimini/settings.json
+The application stores its settings and bookmarks files in a folder named `psobolik.jimini` in standard directories, following the conventions of the operating system the library is running on.
 
-- Bookmarks: ~/.local/share/psobolik.jimini/bookmarks.json
+|                 | Windows                   | Linux                                   | macOS                               |
+|-----------------|---------------------------|-----------------------------------------|-------------------------------------|
+| `settings.json` | `{FOLDERID_LocalAppData}` | `\$XDG_CONFIG_HOME or $HOME/.config`    | `$HOME/Library/Application Support` |
+| `bookmarks`     | `{FOLDERID_LocalAppData}` | `\$XDG_DATA_HOME or $HOME/.local/share` | `$HOME/Library/Application Support` |

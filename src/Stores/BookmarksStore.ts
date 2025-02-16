@@ -1,17 +1,18 @@
 import Bookmark from "../Data/Bookmark.ts";
-import {BaseDirectory, createDir, exists, readTextFile, writeTextFile} from "@tauri-apps/api/fs";
-import {appLocalDataDir} from "@tauri-apps/api/path";
+import {createDir, exists, readTextFile, writeTextFile} from "@tauri-apps/api/fs";
+import {appLocalDataDir, resolve} from "@tauri-apps/api/path";
 
 export default class BookmarksStore {
     static fileName = "bookmarks.json";
 
     public static read = async (): Promise<Bookmark[]> => {
+        const dir = await appLocalDataDir();
+        const bookmarksFile = await resolve(dir, BookmarksStore.fileName);
         try {
-            const json = await readTextFile(BookmarksStore.fileName, {dir: BaseDirectory.AppLocalData});
+            const json = await readTextFile(bookmarksFile);
             return JSON.parse(json);
-            // return Bookmark.sortAndRenumber(JSON.parse(json));
         } catch (e) {
-            console.error(`read failure: ${e}`)
+            // No bookmarks is not an error
             return [];
         }
     }
@@ -20,9 +21,10 @@ export default class BookmarksStore {
         if (!await exists(dir)) {
             await createDir(dir, {recursive: true});
         }
-        const json = JSON.stringify(bookmarks);
+        const bookmarksFile = await resolve(dir, BookmarksStore.fileName);
+        const contents = JSON.stringify(bookmarks);
         try {
-            await writeTextFile(`${dir}${BookmarksStore.fileName}`, json);
+            await writeTextFile(bookmarksFile, contents);
         } catch (e) {
             console.error(`write failure: ${e}`)
         }

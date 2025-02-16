@@ -1,6 +1,6 @@
 [package]
 name = "jimini"
-version = "0.1.1"
+version = "0.1.2"
 description = "A Gemini Browser"
 authors = ["psobolik@zoho.com"]
 edition = "2021"
