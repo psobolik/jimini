@@ -39,7 +39,7 @@ const SettingsDialog: React.FunctionComponent<SettingsDialogProps> = (props) => 
         if (e.key === 'Escape') cancel();
     }
     const cancel = () => {
-        if (props.onCancel) props.onCancel();
+        props.onCancel();
         setShowDialog(false);
     }
     const onTextSizeChange = (newTextSize: TextSize) => {

@@ -7,18 +7,6 @@ interface TextSizePickerProps {
 }
 
 const TextSizePicker: React.FunctionComponent<TextSizePickerProps> = (props) => {
-    const [textSize, setTextSize] = React.useState<TextSize>(props.textSize);
-
-    React.useEffect(() => {
-        props.onTextSizeChange(textSize);
-    }, [textSize])
-    React.useEffect(() => {
-        setTextSize(props.textSize)
-    }, [props.textSize])
-    const onTextSizeChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
-        setTextSize(Number(evt.target.value))
-    }
-
     return <fieldset>
         <legend>Text Size</legend>
         <div>
@@ -26,8 +14,8 @@ const TextSizePicker: React.FunctionComponent<TextSizePickerProps> = (props) => 
                    id="text-size-small"
                    name="textSize"
                    value={TextSize.SMALL}
-                   onChange={onTextSizeChange}
-                   checked={textSize == TextSize.SMALL}/>
+                   onChange={event => props.onTextSizeChange(Number(event.target.value))}
+                   checked={props.textSize == TextSize.SMALL}/>
             <label htmlFor="text-size-small">Small</label>
         </div>
         <div>
@@ -35,8 +23,8 @@ const TextSizePicker: React.FunctionComponent<TextSizePickerProps> = (props) => 
                    id="text-size-medium"
                    name="textSize"
                    value={TextSize.MEDIUM}
-                   onChange={onTextSizeChange}
-                   checked={textSize == TextSize.MEDIUM}/>
+                   onChange={event => props.onTextSizeChange(Number(event.target.value))}
+                   checked={props.textSize == TextSize.MEDIUM}/>
             <label htmlFor="text-size-medium">Medium</label>
         </div>
         <div>
@@ -44,8 +32,8 @@ const TextSizePicker: React.FunctionComponent<TextSizePickerProps> = (props) => 
                    id="text-size-large"
                    name="textSize"
                    value={TextSize.LARGE}
-                   onChange={onTextSizeChange}
-                   checked={textSize == TextSize.LARGE}/>
+                   onChange={event => props.onTextSizeChange(Number(event.target.value))}
+                   checked={props.textSize == TextSize.LARGE}/>
             <label htmlFor="text-size-large">Large</label>
         </div>
     </fieldset>

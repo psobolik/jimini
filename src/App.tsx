@@ -20,10 +20,10 @@ import UrlHistory from "./UrlHistory.ts";
 import InputDialog from "./dialogs/InputDialog.tsx";
 import AboutDialog from "./dialogs/AboutDialog.tsx";
 import SettingsDialog from "./dialogs/SettingsDialog.tsx";
-import HamburgerMenu from "./components/HamburgerMenu.tsx";
 import BookmarkPanel from "./components/BookmarkPanel.tsx";
 import BookmarksStore from "./Stores/BookmarksStore.ts";
 import Bookmark from "./Data/Bookmark.ts";
+import Header from "./components/Header.tsx";
 
 function App() {
     const URL_HISTORY_CAPACITY = 20;
@@ -256,10 +256,9 @@ function App() {
         success.lines().forEach((line, index) => {
             const geminiLine = GeminiLine.parseLine(line);
             if (geminiLine.type === LineType.PreformatToggle) {
-                if (!preformat) {
-                    preformattedChildren = [];
-                } else {
+                if (preformat) {
                     lines.push(<pre key={index}>{preformattedChildren}</pre>);
+                    preformattedChildren = [];
                 }
                 preformat = !preformat;
             } else if (preformat) {
@@ -379,45 +378,25 @@ function App() {
         {showBookmarkPanel ?
             <BookmarkPanel bookmarks={bookmarks} updateBookmarks={updateBookmarks} removeBookmark={removeBookmark}
                            openUrl={openBookmarkUrl} cancel={() => setShowBookmarkPanel(false)}/> : <>
-                <header>
-                    <HamburgerMenu onSave={saveDocument} onSettings={() => setShowSettings(true)}
-                                   onShowAbout={() => setShowAbout(true)}
-                                   onShowBookmarkPanel={() => setShowBookmarkPanel(true)}
-                    />
-                    <button id={"home-button"} className={"nav-button"} onClick={home} title={"Open home page"}
-                            disabled={settings.homeUrlString.length === 0}>{<svg viewBox="0 0 26 26">
-                        <polygon
-                            points="13,3 25,14 20,14 20,22 15,22 15,17 11,17 11,22 6,22 6,14 1,14"
-                            strokeLinejoin="round"
-                        />
-                    </svg>}
-                    </button>
-                    <button id={"bookmark-button"} className={"nav-button"} onClick={addBookmark}
-                            title={"Bookmark current page"}
-                            disabled={isCurrentUrlBookmarked()}>{<svg viewBox="0 0 26 26">
-                        <polygon
-                            points="19,24 13,16 7,24 7,3 19,3"
-                            strokeLinejoin="round"
-                        />
-                    </svg>}
-                    </button>
-                    <button id="previous-button" className="nav-button" onClick={previous} title={"Previous"}
-                            disabled={!urlHistory.hasPreviousUrl()}>{<svg viewBox="0 0 26 26">
-                        <use href="#triangle" transform="rotate(-90, 13, 13)"/>
-                    </svg>}
-                    </button>
-                    <button id="next-button" className="nav-button" onClick={next} title={"Next"}
-                            disabled={!urlHistory.hasNextUrl()}>{<svg
-                        viewBox="0 0 26 26">
-                        <use href="#triangle" transform="rotate(90, 13, 13)"/>
-                    </svg>}</button>
-                    <input type="text" placeholder="Gemini URL" id="gemini-url-input"
-                           value={urlInputString}
-                           onChange={e => setUrlInputString(e.target.value)}
-                           onKeyUp={onUrlKeyUp}
-                    />
-                    <button onClick={openInputUrl} disabled={urlInputString.length === 0}>Go</button>
-                </header>
+                <Header
+                    saveDocument={saveDocument}
+                    showSettings={() => setShowSettings(true)}
+                    showAbout={() => setShowAbout(true)}
+                    showBookmarks={() => setShowBookmarkPanel(true)}
+                    canGoHome={settings.homeUrlString.length !== 0}
+                    goHome={home}
+                    canAddBookmark={!isCurrentUrlBookmarked()}
+                    addBookmark={addBookmark}
+                    canShowPrevious={urlHistory.hasPreviousUrl()}
+                    showPrevious={previous}
+                    canShowNext={urlHistory.hasNextUrl()}
+                    showNext={next}
+                    url={urlInputString}
+                    canOpenUrl={urlInputString.length === 0}
+                    openUrl={openInputUrl}
+                    setUrl={url => setUrlInputString(url)}
+                    onUrlKeyUp={onUrlKeyUp}
+                />
                 <div className="container">
                     {loading && <div className="loading">Loading...</div>}
                     {info && <p id={"info"}>{info}</p>}
