@@ -17,13 +17,14 @@ import SettingsStore from "./Stores/SettingsStore.ts"
 import Util from "./Util.ts";
 import JiminiLink from "./Data/JiminiLink.ts";
 import UrlHistory from "./UrlHistory.ts";
-import InputDialog from "./dialogs/InputDialog.tsx";
-import AboutDialog from "./dialogs/AboutDialog.tsx";
-import SettingsDialog from "./dialogs/SettingsDialog.tsx";
+import InputDialogPanel from "./dialogs/InputDialogPanel.tsx";
+import AboutDialogPanel from "./dialogs/AboutDialogPanel.tsx";
+import SettingsDialogPanel from "./dialogs/SettingsDialogPanel.tsx";
 import BookmarkPanel from "./components/BookmarkPanel.tsx";
 import BookmarksStore from "./Stores/BookmarksStore.ts";
 import Bookmark from "./Data/Bookmark.ts";
 import Header from "./components/Header.tsx";
+import Dialog from "./dialogs/Dialog.tsx";
 
 function App() {
     const URL_HISTORY_CAPACITY = 20;
@@ -236,7 +237,7 @@ function App() {
         return <></>
     }
     const formatGeminiSuccess = (success: Success) => {
-        const showLink = (target: HTMLElement)=> {
+        const showLink = (target: HTMLElement) => {
             let link = target.dataset.link;
             if (link) {
                 setFooter(new URL(link, urlInputString).toString());
@@ -406,20 +407,27 @@ function App() {
                 </div>
                 <footer>{footer}</footer>
             </>}
-        <InputDialog
-            isOpen={promptForInput || promptForSensitiveInput}
+        <Dialog
+            isOpen={promptForInput || promptForSensitiveInput} content={<InputDialogPanel
             onInput={onInput}
             onCancel={onInputCancel}
             dialogContent={dialogContent}
             isSensitive={promptForSensitiveInput}
+        />}
         />
-        <AboutDialog isOpen={showAbout} onCancel={() => setShowAbout(false)}/>
-        <SettingsDialog
+        <Dialog
+            isOpen={showAbout}
+            content={<AboutDialogPanel onCancel={() => setShowAbout(false)}/>}
+        />
+        <Dialog
             isOpen={showSettings}
-            settings={settings}
-            urlString={urlString}
-            onChangeSettings={setSettings}
-            onCancel={() => setShowSettings(false)}/>
+            content={<SettingsDialogPanel
+                settings={settings}
+                urlString={urlString}
+                onChangeSettings={setSettings}
+                onCancel={() => setShowSettings(false)}
+            />}
+        />
         <svg className="symbol-set">
             <symbol id="triangle">
                 <polygon
