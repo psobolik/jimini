@@ -138,6 +138,12 @@ function App() {
                 .catch(error => setGeminiError(error));
         }
     }
+    const saveSuccessBody = (success: Success)=> {
+        if (success && success.body) {
+            const suggestedFileName = Util.removeTrailingSlash(urlString);
+            saveOctets(Util.toUrl(suggestedFileName), success.body);
+        }
+    }
     const saveDocument = () => {
         const getSuggestedFileName = (urlString: string, success: Success) => {
             // Remove trailing slash no matter what
@@ -209,7 +215,7 @@ function App() {
                 }
             } else {
                 setInfo(`Can't display MIME type "${success.mimeType}"\n`)
-                saveDocument();
+                saveSuccessBody(success);
             }
         } else if (result.redirect) {
             const redirect = new Redirect(result.redirect);
