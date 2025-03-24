@@ -1,4 +1,4 @@
-import {invoke} from "@tauri-apps/api/tauri";
+import {invoke} from "@tauri-apps/api/core";
 import GeminiResponse from "./Data/GeminiResponse.ts";
 
 export default class Tauri {

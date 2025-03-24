@@ -1,4 +1,4 @@
-import {createDir, exists, readTextFile, writeTextFile} from "@tauri-apps/api/fs";
+import {mkdir, exists, readTextFile, writeTextFile} from "@tauri-apps/plugin-fs";
 import {appConfigDir, resolve} from "@tauri-apps/api/path";
 import {Settings} from "../Data/Settings.ts";
 
@@ -12,14 +12,16 @@ export default class SettingsStore {
             const contents = await readTextFile(settingsFile);
             return JSON.parse(contents);
         } catch (e) {
-            // No settings is not an error
+            // It is not an error to have no settings
+            console.error(`read failure: ${e}`)
             return new Settings();
         }
     }
     public static write = async (settings: Settings) => {
         const dir = await appConfigDir();
+        // Create the folder if it doesn't exist
         if (!await exists(dir)) {
-            await createDir(dir, {recursive: true});
+            await mkdir(dir, {recursive: true});
         }
         const settingsFile = await resolve(dir, SettingsStore.fileName);
         const contents = JSON.stringify(settings);
@@ -28,6 +30,5 @@ export default class SettingsStore {
         } catch (e) {
             console.error(`write failure: ${e}`)
         }
-
     }
 }

@@ -32,6 +32,9 @@ fn make_gemini_request(url: url::Url) -> Result<GeminiResponse, String> {
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_cli::init())
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             version,
             make_gemini_request,

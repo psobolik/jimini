@@ -1,10 +1,10 @@
 import "./styles/App.css";
 import React from "react";
 import Tauri from "./Tauri.ts";
-import {getMatches} from "@tauri-apps/api/cli";
+import {getMatches} from "@tauri-apps/plugin-cli";
 import {downloadDir} from "@tauri-apps/api/path";
-import {save} from "@tauri-apps/api/dialog";
-import {writeBinaryFile} from "@tauri-apps/api/fs";
+import {save} from "@tauri-apps/plugin-dialog";
+import {writeFile} from "@tauri-apps/plugin-fs";
 import Certificate from "./Data/Certificate.ts";
 import Redirect from "./Data/Redirect.ts";
 import Failure from "./Data/Failure.ts";
@@ -52,7 +52,10 @@ function App() {
         window.addEventListener("keyup", onKeyUp);
         return () => window.removeEventListener("keyup", onKeyUp);
     }, [])
+    let initialized = false;
     React.useEffect(() => {
+        if (initialized) return;
+
         SettingsStore.read()
             .then(value => {
                 setSettings(value);
@@ -67,6 +70,7 @@ function App() {
                     }
                 })
             }).catch(e => console.error(e));
+        return () => {initialized = true}
     }, [])
     React.useEffect(() => {
         if (settings) {
@@ -155,7 +159,7 @@ function App() {
         getSavePath(url)
             .then(savePath => {
                 if (savePath) {
-                    writeBinaryFile(savePath, octets).then();
+                    writeFile(savePath, Uint8Array.from(octets)).then();
                 }
             })
     }

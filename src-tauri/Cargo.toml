@@ -1,6 +1,6 @@
 [package]
 name = "jimini"
-version = "0.2.0"
+version = "0.3.0"
 description = "A Gemini Browser"
 authors = ["psobolik@zoho.com"]
 edition = "2021"
@@ -9,13 +9,17 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1", features = [] }
+tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "1", features = [ "fs-exists", "fs-create-dir", "fs-write-file", "fs-read-file", "path-all", "dialog-save", "cli"] }
+tauri = { version = "2", features = [] }
 url = "2"
 open = "5.1.1"
 base64 = "0.22.1"
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+serde_json = "1.0.140"
+#serde = "1.0.219"
 
 [dependencies.gemini-lib]
 git = "https://github.com/psobolik/gemini-lib.git"
@@ -23,3 +27,6 @@ git = "https://github.com/psobolik/gemini-lib.git"
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
 custom-protocol = ["tauri/custom-protocol"]
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-cli = "2"

@@ -1,0 +1,29 @@
+{
+  "identifier": "permissions-capability",
+  "description": "File system and dialog permissions",
+  "local": true,
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "fs:allow-appconfig-read",
+    "fs:allow-applocaldata-read",
+    "fs:allow-write-file",
+    "fs:allow-write-text-file",
+    "fs:allow-mkdir",
+    "fs:allow-exists",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        "$CONFIG/**/*",
+        "$APPCONFIG/**/*",
+        "$APPLOCALDATA/**/*",
+        "$LOCALDATA/**/*"
+      ]
+    },
+    "dialog:allow-save",
+    "dialog:default",
+    "fs:default"
+  ]
+}

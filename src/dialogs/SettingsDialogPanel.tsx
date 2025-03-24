@@ -14,43 +14,37 @@ interface SettingsDialogPanelProps {
 }
 
 const SettingsDialogPanel: React.FunctionComponent<SettingsDialogPanelProps> = (props) => {
-    const [settings, setSettings] = React.useState<Settings>(props.settings);
+    const [textSize, setTextSize] = React.useState<TextSize>(props.settings.textSize);
+    const [colorScheme, setColorScheme] = React.useState<ColorScheme>(props.settings.colorScheme);
+    const [homeUrlString, setHomeUrlString] = React.useState<string>(props.settings.homeUrlString);
+
+    React.useEffect(() => {
+        setTextSize(props.settings.textSize);
+        setColorScheme(props.settings.colorScheme);
+        setHomeUrlString(props.settings.homeUrlString);
+    }, [props.settings])
+
+    React.useEffect(() => {
+        let newSettings = new Settings(colorScheme, homeUrlString, textSize);
+        props.onChangeSettings(newSettings);
+    }, [textSize, colorScheme, homeUrlString])
 
     const onKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Escape') cancel();
     }
+
     const cancel = () => {
         props.onCancel();
     }
-    const onTextSizeChange = (newTextSize: TextSize) => {
-        if (props.settings.textSize == newTextSize) return;
 
-        let newSettings = new Settings(settings.colorScheme, settings.homeUrlString, newTextSize);
-        setSettings(newSettings);
-        props.onChangeSettings(newSettings);
-    }
-    const onColorSchemeChange = (newColorScheme: ColorScheme) => {
-        if (props.settings.colorScheme == newColorScheme) return;
-
-        let newSettings = new Settings(newColorScheme, settings.homeUrlString, settings.textSize);
-        setSettings(newSettings);
-        props.onChangeSettings(newSettings);
-    }
-    const setHomeUrlString = (value: string) => {
-        if (props.settings.homeUrlString == value) return;
-
-        let newSettings = new Settings(settings.colorScheme, value, settings.textSize);
-        setSettings(newSettings);
-        props.onChangeSettings(newSettings);
-    }
     return <span id={"settings-dialog"}
                  onKeyDown={onKeyDown}>
         <ClosePanel onClose={cancel}/>
         <div style={{display: "grid", gridTemplateColumns: "auto auto"}}>
-            <ColorSchemePicker onColorSchemeChange={onColorSchemeChange} colorScheme={settings.colorScheme}/>
-            <TextSizePicker onTextSizeChange={onTextSizeChange} textSize={settings.textSize}/>
+            <ColorSchemePicker onColorSchemeChange={setColorScheme} colorScheme={colorScheme}/>
+            <TextSizePicker onTextSizeChange={setTextSize} textSize={textSize}/>
         </div>
-        <HomeCapsuleSelector home={settings.homeUrlString} current={props.urlString} onSelectHome={setHomeUrlString}/>
+        <HomeCapsuleSelector onSelectHome={setHomeUrlString} home={homeUrlString} current={props.urlString}/>
     </span>
 }
 export default SettingsDialogPanel;

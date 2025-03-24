@@ -38,6 +38,10 @@ On Linux, the executable is `./src-tauri/target/release/jimini`, and the install
 * `./src-tauri/target/release/bundle/rpm/jimini-`*version*`-1.x86_64.rpm`
 * `.src-tauri/target/release/bundle/appimage/jimini_`*version*`_amd64.AppImage`
 
+**Note:** Run the following command to set `jimini` as the default URL handler for the `gemini://` scheme on Linux:
+```shell
+$ xdg-mime default Jimini.desktop "x-scheme-handler/gemini"
+```
 On macOS, the executable is `./src-tauri/target/release/bundle/macos/Jimini.app`, and the installer is `./src-tauri/target/release/bundle/dmg/Jimini_`*version*`_x64.dmg`
 
 # Version
