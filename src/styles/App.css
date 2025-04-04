@@ -215,7 +215,13 @@ svg.symbol-set {
 #gemini-url-input {
   flex: auto;
 }
-#info, #gemini_error {
+#loading {
+  padding: 0.5em;
+  color: var(--loading-color);
+  font-weight: bold;
+}
+
+#info, #gemini_error, #loading {
   font-size: larger;
   text-align: center;
   padding: 1em;
@@ -327,14 +333,14 @@ div.x-panel {
     }
   }
 }
-div .loading {
-  text-align: center;
-  padding: 0.5em;
-  color: var(--loading-color);
-  font-size: larger;
-  font-weight: bold;
-  display: block;
-}
+/*div .loading {*/
+/*  text-align: center;*/
+/*  padding: 0.5em;*/
+/*  color: var(--loading-color);*/
+/*  font-size: larger;*/
+/*  font-weight: bold;*/
+/*  display: block;*/
+/*}*/
 
 @media (prefers-color-scheme: dark) {
   html {

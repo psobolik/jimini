@@ -9,13 +9,11 @@ import Certificate from "./Data/Certificate.ts";
 import Redirect from "./Data/Redirect.ts";
 import Failure from "./Data/Failure.ts";
 import Success from "./Data/Success.ts"
-import GeminiLine, {LineType} from "./Data/GeminiLine.ts";
 import GeminiResponse from "./Data/GeminiResponse.ts";
 import Prompt from "./Data/Prompt.ts";
 import {ColorScheme, Settings, TextSize} from "./Data/Settings.ts";
 import SettingsStore from "./Stores/SettingsStore.ts"
 import Util from "./Util.ts";
-import JiminiLink from "./Data/JiminiLink.ts";
 import UrlHistory from "./UrlHistory.ts";
 import InputDialogPanel from "./dialogs/InputDialogPanel.tsx";
 import AboutDialogPanel from "./dialogs/AboutDialogPanel.tsx";
@@ -25,6 +23,8 @@ import BookmarksStore from "./Stores/BookmarksStore.ts";
 import Bookmark from "./Data/Bookmark.ts";
 import Header from "./components/Header.tsx";
 import Dialog from "./dialogs/Dialog.tsx";
+import SuccessDocument from "./components/documents/SuccessDocument.tsx";
+import InfoPanel from "./components/InfoPanel.tsx";
 
 function App() {
     const URL_HISTORY_CAPACITY = 20;
@@ -70,7 +70,9 @@ function App() {
                     }
                 })
             }).catch(e => console.error(e));
-        return () => {initialized = true}
+        return () => {
+            initialized = true
+        }
     }, [])
     React.useEffect(() => {
         if (settings) {
@@ -138,7 +140,7 @@ function App() {
                 .catch(error => setGeminiError(error));
         }
     }
-    const saveSuccessBody = (success: Success)=> {
+    const saveSuccessBody = (success: Success) => {
         if (success && success.body) {
             const suggestedFileName = Util.removeTrailingSlash(urlString);
             saveOctets(Util.toUrl(suggestedFileName), success.body);
@@ -235,91 +237,6 @@ function App() {
             setInfo(`Unsupported response: ${certificate.toString()}`);
         }
     }
-
-    function onLinkClick(target: HTMLElement) {
-        let link = target.dataset.link;
-        if (link) openUrl(new URL(link, urlInputString).toString(), false);
-    }
-
-    const formatSuccess = (success: Success) => {
-        if (success.isGemini()) return formatGeminiSuccess(success);
-        if (success.isTextLike()) return formatPlainSuccess(success);
-        return <></>
-    }
-    const formatGeminiSuccess = (success: Success) => {
-        const showLink = (target: HTMLElement) => {
-            let link = target.dataset.link;
-            if (link) {
-                setFooter(new URL(link, urlInputString).toString());
-            }
-        }
-        const hideLink = () => {
-            setFooter("")
-        }
-        const stripAnsiSequences = (line: string): string => {
-            // Ought not be in there anyway...
-            const re = /\x1b\[[\x20-\x3f]*[\x40-\x7e]*/g;
-            return line.replaceAll(re, "");
-        }
-        let preformattedChildren: React.ReactNode[] = [];
-        let preformat = false;
-        const lines: React.ReactNode[] = [];
-        success.lines().forEach((line, index) => {
-            const geminiLine = GeminiLine.parseLine(line);
-            if (geminiLine.type === LineType.PreformatToggle) {
-                if (preformat) {
-                    lines.push(<pre key={index}>{preformattedChildren}</pre>);
-                    preformattedChildren = [];
-                }
-                preformat = !preformat;
-            } else if (preformat) {
-                preformattedChildren.push(<span key={index}>{stripAnsiSequences(line)}<br/></span>);
-            } else switch (geminiLine.type) {
-                case LineType.Link:
-                    const jimini_link = JiminiLink.parseString(geminiLine.text ?? "");
-                    try {
-                        const link = new URL(jimini_link.link, urlString);
-                        let className = "link";
-                        if (link.protocol !== "gemini:") className += " foreign-link";
-                        lines.push(<div key={index}>
-                            <a href={"#"} className={className} data-link={jimini_link.link}
-                               onFocus={e => showLink(e.target as HTMLElement)}
-                               onBlur={hideLink}
-                               onMouseEnter={e => showLink(e.target as HTMLElement)}
-                               onMouseLeave={hideLink}
-                               onClick={e => onLinkClick(e.target as HTMLElement)}>
-                                {jimini_link.name}
-                            </a>
-                        </div>);
-                    } catch (e) {
-                        console.error(e)
-                        break; // This is so invalid URLs don't crash the app
-                    }
-                    break;
-                case LineType.Heading1:
-                    lines.push(<h1 key={index}>{geminiLine.text}</h1>);
-                    break;
-                case LineType.Heading2:
-                    lines.push(<h2 key={index}>{geminiLine.text}</h2>);
-                    break;
-                case LineType.Heading3:
-                    lines.push(<h3 key={index}>{geminiLine.text}</h3>);
-                    break;
-                case LineType.ListItem:
-                    lines.push(<div className="list-item" key={index}>{geminiLine.text}</div>);
-                    break;
-                case LineType.Quote:
-                    lines.push(<div className="quote" key={index}>{geminiLine.text}</div>);
-                    break;
-                default:
-                    lines.push(<div className="text" key={index}>{line}</div>);
-            }
-        });
-        return lines;
-    }
-    const formatPlainSuccess = (success: Success) => {
-        return <div className="plain">{success.lines().map((line, index) => <div key={index}>{line}</div>)}</div>
-    }
     const updateBookmarks = (bookmarks: Bookmark[]) => setBookmarks(Bookmark.sortAndRenumber(bookmarks));
     const addBookmark = () => {
         if (!bookmarks.find(value => value.url === urlString)) {
@@ -409,10 +326,15 @@ function App() {
                     onUrlKeyUp={onUrlKeyUp}
                 />
                 <div className="container">
-                    {loading && <div className="loading">Loading...</div>}
-                    {info && <p id={"info"}>{info}</p>}
-                    {geminiError && <p id="gemini_error">{geminiError}</p>}
-                    {success && formatSuccess(success)}
+                    <InfoPanel hidden={!loading} text={"Loading..."} id={"loading"}/>
+                    <InfoPanel hidden={info === ""} text={info} id={"info"}/>
+                    <InfoPanel hidden={geminiError === ""} text={geminiError} id={"gemini_error"}/>
+                    <SuccessDocument
+                        hidden={success === undefined}
+                        success={success}
+                        baseUrl={urlInputString}
+                        setLink={setFooter}
+                        openUrl={url => openUrl(url.toString(), false)}/>
                     {inlineImageSrc && <img alt={urlString} src={inlineImageSrc}/>}
                 </div>
                 <footer>{footer}</footer>
